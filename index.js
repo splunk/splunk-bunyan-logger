@@ -24,7 +24,7 @@ function _end(callback) {
  * SplunkStream - a class that implements a writable stream
  */
 var SplunkStream = function (config) {
-    this.config = splunklogging.validateConfiguration(config);
+    this.config = splunklogging.validateConfig(config);
 
     // If using the common logger's default name, change it
     if (this.config.name === "splunk-javascript-logging/0.8.0") {
@@ -57,6 +57,8 @@ SplunkStream.prototype.write = function (config, event) {
     }
     // TODO: else, copy values from config to currentConfig
 
+
+    // TODO: for the time, run Date.parse(event.time) / 1000; // to strip out the ms
     /** Values provided by Bunyan
      * v: Required. Integer. Added by Bunyan. Cannot be overriden. This is the Bunyan log format version (require('bunyan').LOG_VERSION). The log version is a single integer. 0 is until I release a version "1.0.0" of node-bunyan. Thereafter, starting with 1, this will be incremented if there is any backward incompatible change to the log record format. Details will be in "CHANGES.md" (the change log).
      * level: Required. Integer. Added by Bunyan. Cannot be overriden. See the "Levels" section.

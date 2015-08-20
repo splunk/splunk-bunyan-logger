@@ -11,7 +11,7 @@ describe("createStream", function() {
         }
         catch(err) {
             assert.ok(err);
-            assert.strictEqual(err.message, "Configuration is required.");
+            assert.strictEqual(err.message, "Config is required.");
         }
     });
     it("should error without config", function() {
@@ -22,7 +22,7 @@ describe("createStream", function() {
         }
         catch(err) {
             assert.ok(err);
-            assert.strictEqual(err.message, "Configuration object must have a token.");
+            assert.strictEqual(err.message, "Config object must have a token.");
         }
     });
     it("should create logger with minimal config", function() {
