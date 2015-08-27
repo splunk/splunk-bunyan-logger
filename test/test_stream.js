@@ -37,7 +37,6 @@ describe("SplunkStream", function() {
         assert.strictEqual("splunk-bunyan-logger/0.8.0", splunkBunyanStream.stream.config().name);
         assert.strictEqual("localhost", splunkBunyanStream.stream.config().host);
         assert.strictEqual("https", splunkBunyanStream.stream.config().protocol);
-        assert.strictEqual(false, splunkBunyanStream.stream.config().strictSSL);
         assert.strictEqual("info", splunkBunyanStream.stream.config().level);
         assert.strictEqual(8088, splunkBunyanStream.stream.config().port);
 
@@ -60,7 +59,6 @@ describe("SplunkStream", function() {
         assert.strictEqual("splunk-bunyan-logger/0.8.0", splunkBunyanStream.stream.config().name);
         assert.strictEqual("localhost", splunkBunyanStream.stream.config().host);
         assert.strictEqual("https", splunkBunyanStream.stream.config().protocol);
-        assert.strictEqual(false, splunkBunyanStream.stream.config().strictSSL);
         assert.strictEqual("info", splunkBunyanStream.stream.config().level);
         assert.strictEqual(8088, splunkBunyanStream.stream.config().port);
 
@@ -75,7 +73,7 @@ describe("SplunkStream", function() {
         };
 
         var splunkBunyanStream = splunkBunyan.createStream(config);
-        splunkBunyanStream.use(function(data, next) {
+        splunkBunyanStream.use(function(settings, next) {
             next(new Error("this is an error!"));
         });
 

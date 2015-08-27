@@ -57,13 +57,21 @@ SplunkStream.prototype.config = function() {
  *
  * The config parameter is optional, and can be overridden per event
  */
-SplunkStream.prototype.write = function (config, event) {
-    // var currentConfig = config;
-    if (typeof event === "undefined") {
-        event = config;
-        config = this.logger.config;
+SplunkStream.prototype.write = function (settings) {    
+    if (!settings) {
+        // TODO: throw an error?
+        throw new Error("Must pass a parameter to write.");
     }
-    // TODO: else, copy values from config to currentConfig
+
+    var config = this.logger._initializeConfig(settings.config || this.config());
+
+    var data = settings.data;
+    // Special case, none of the expected keys are found, so treat settings as the data
+    if (!settings.hasOwnProperty("data") && 
+             !settings.hasOwnProperty("config") &&
+             !settings.hasOwnProperty("requestOptions")) {
+        data = settings;
+    }
 
 
     // TODO: for the time, run Date.parse(event.time) / 1000; // to strip out the ms
@@ -100,7 +108,11 @@ SplunkStream.prototype.write = function (config, event) {
      */
 
     // TODO: add a test passing through the this.error callback somehow
-    this.logger.send(this.logger.config, event, this.send);
+    var param = {
+        config: config,
+        data: data
+    };
+    this.logger.send(param, this.send);
 };
 
 module.exports =  {

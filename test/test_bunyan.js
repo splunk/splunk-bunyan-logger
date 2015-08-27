@@ -104,6 +104,7 @@ describe("Bunyan", function() {
     });
 
     it("should fail sending data to invalid url, caught by custom stream.send", function(done) {
+        // TODO: update tests like this to use a custom error handler which writes to a string, buffer or duplex stream
         var config = {
             url: "https://invalid.server:8088/services/collector/invalid/1.0",
             token: "does-not-matter"

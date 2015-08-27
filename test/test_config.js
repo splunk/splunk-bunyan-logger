@@ -45,7 +45,6 @@ describe("createStream", function() {
         assert.strictEqual("localhost", splunkBunyanStream.stream.config().host);
         assert.strictEqual("/services/collector/event/1.0", splunkBunyanStream.stream.config().path);
         assert.strictEqual("https", splunkBunyanStream.stream.config().protocol);
-        assert.strictEqual(false, splunkBunyanStream.stream.config().strictSSL);
         assert.strictEqual("info", splunkBunyanStream.stream.config().level);
         assert.strictEqual(8088, splunkBunyanStream.stream.config().port);
     });
@@ -70,7 +69,6 @@ describe("createStream", function() {
         assert.strictEqual("localhost", splunkBunyanStream.stream.config().host);
         assert.strictEqual("/services/collector/event/1.0", splunkBunyanStream.stream.config().path);
         assert.strictEqual("https", splunkBunyanStream.stream.config().protocol);
-        assert.strictEqual(false, splunkBunyanStream.stream.config().strictSSL);
         assert.strictEqual("info", splunkBunyanStream.stream.config().level);
         assert.strictEqual(8088, splunkBunyanStream.stream.config().port);
     });
@@ -95,7 +93,6 @@ describe("createStream", function() {
         assert.strictEqual("localhost", splunkBunyanStream.stream.config().host);
         assert.strictEqual(config.path, splunkBunyanStream.stream.config().path);
         assert.strictEqual("https", splunkBunyanStream.stream.config().protocol);
-        assert.strictEqual(false, splunkBunyanStream.stream.config().strictSSL);
         assert.strictEqual("info", splunkBunyanStream.stream.config().level);
         assert.strictEqual(8088, splunkBunyanStream.stream.config().port);
     });
@@ -124,7 +121,6 @@ describe("createStream", function() {
         assert.strictEqual("/services/collector/event/1.0", splunkBunyanStream.stream.config().path);
         assert.strictEqual(config.middleware, splunkBunyanStream.stream.config().middleware);
         assert.strictEqual("https", splunkBunyanStream.stream.config().protocol);
-        assert.strictEqual(false, splunkBunyanStream.stream.config().strictSSL);
         assert.strictEqual("info", splunkBunyanStream.stream.config().level);
         assert.strictEqual(8088, splunkBunyanStream.stream.config().port);
     });
