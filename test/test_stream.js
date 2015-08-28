@@ -64,20 +64,43 @@ describe("SplunkStream", function() {
 
         var data = "something";
 
-        splunkBunyanStream.stream.write(config, data);
+        var settings = {
+            data: data,
+            config: config
+        };
+
+        splunkBunyanStream.stream.write(settings);
         splunkBunyanStream.stream.end(done);
     });
     it("should call default error callback", function(done) {
         var config = {
             token: configurationFile.token
         };
-
+        var run = false;
         var splunkBunyanStream = splunkBunyan.createStream(config);
         splunkBunyanStream.use(function(settings, next) {
+            run = true;
             next(new Error("this is an error!"));
         });
 
         splunkBunyanStream.stream.write("something");
+        assert.ok(run);     
         splunkBunyanStream.stream.end(done);
+    });
+    it("should error when writing without args", function(done) {
+        var config = {
+            token: configurationFile.token
+        };
+        var run = false;
+        var splunkBunyanStream = splunkBunyan.createStream(config);
+        splunkBunyanStream.stream.on("error", function(err) {
+            run = true;
+        });
+        splunkBunyanStream.stream.write();
+        
+        splunkBunyanStream.stream.end(function() {
+            assert.ok(run);
+            done();
+        });
     });
 });

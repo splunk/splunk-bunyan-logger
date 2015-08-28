@@ -142,7 +142,6 @@ describe("Bunyan", function() {
             called = true;
             assert.ok(err);
             assert.ok(called);
-            done();
         };
 
         // Override the default error function
@@ -163,6 +162,7 @@ describe("Bunyan", function() {
         });
 
         Logger.info("this is a test statement");
+        splunkBunyanStream.stream.end(done);
     });
 
     it("should fail sending data with invalid token", function(done) {

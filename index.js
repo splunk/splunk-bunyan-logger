@@ -59,8 +59,8 @@ SplunkStream.prototype.config = function() {
  */
 SplunkStream.prototype.write = function (settings) {    
     if (!settings) {
-        // TODO: throw an error?
-        throw new Error("Must pass a parameter to write.");
+        this.emit("error", new Error("Must pass a parameter to write."));
+        return;
     }
 
     var config = this.logger._initializeConfig(settings.config || this.config());
