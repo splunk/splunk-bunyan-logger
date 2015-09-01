@@ -68,6 +68,8 @@ describe("Bunyan", function() {
         assert.strictEqual(splunkBunyanStream.stream, Logger.streams[0].stream);
     });
     
+    // TODO: this tests passes trivially, other tests are emitting the error
+    //       event, which make the error event here fire. BAD BAD BAD.    
     // it("should fail sending data to invalid url, caught by stream.send", function(done) {
     //     this.timeout(5000);
     //     var config = {
