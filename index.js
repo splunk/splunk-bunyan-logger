@@ -57,20 +57,23 @@ SplunkStream.prototype.config = function() {
  *
  * The config parameter is optional, and can be overridden per event
  */
-SplunkStream.prototype.write = function (settings) {    
-    if (!settings) {
+SplunkStream.prototype.write = function (context) {    
+    if (!context) {
         this.emit("error", new Error("Must pass a parameter to write."));
         return;
     }
 
-    var config = this.logger._initializeConfig(settings.config || this.config());
+    var config = this.logger._initializeConfig(context.config || this.config());
 
-    var data = settings.data;
-    // Special case, none of the expected keys are found, so treat settings as the data
-    if (!settings.hasOwnProperty("data") && 
-             !settings.hasOwnProperty("config") &&
-             !settings.hasOwnProperty("requestOptions")) {
-        data = settings;
+    var data = context.data;
+    // Special cases, none of the expected keys are found, so treat context as the data
+    if (typeof context === "string") {
+        data = context;
+    }
+    else if (!context.hasOwnProperty("data") && 
+             !context.hasOwnProperty("config") &&
+             !context.hasOwnProperty("requestOptions")) {
+        data = context;
     }
 
 
