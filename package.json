@@ -35,7 +35,7 @@
   "devDependencies": {
     "bunyan": "1.4.0",
     "istanbul": "0.3.17",
-    "jshint": "2.8.0",
+    "jshint": "<2.5.0",
     "mocha": "2.2.5"
   }
 }
