@@ -3,7 +3,7 @@ var assert = require("assert");
 
 /** Unit tests **/
 
-// TODO: test levels
+// TODO: test levels for coverage
 
 describe("createStream", function() {
     it("should error without config", function() {

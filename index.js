@@ -15,18 +15,18 @@ var levels = {
 
 function severityFromLevel(level) {
     switch(level) {
-        case levels.trace:
-            return "trace";
-        case levels.debug:
-            return "debug";
-        case levels.warn:
-            return "warn";
-        case levels.error:
-            return "error";
-        case levels.fatal:
-            return "fatal";
+        case 10:
+            return levels.trace;
+        case 20:
+            return levels.debug;
+        case 40:
+            return levels.warn;
+        case 50:
+            return levels.error;
+        case 60:
+            return levels.fatal;
         default:
-            return "info";
+            return levels.info;
     }
 }
 
@@ -80,7 +80,6 @@ SplunkStream.prototype.write = function (data) {
         this.emit("error", new Error("Must pass a parameter to write."));
         return;
     }
-
 
     // TODO: for the time, run Date.parse(event.time) / 1000; // to strip out the ms
     // TODO: name, should this overwrite this.config().name?
@@ -147,6 +146,10 @@ module.exports =  {
     createStream: function (config) {
         var stream =  new SplunkStream(config);
         return {
+            /**
+             * TODO: docs
+             * The logging level for Bunyan, defaults to info.
+             */
             level: config.level || this.levels.info,
             type: "raw",
             /**

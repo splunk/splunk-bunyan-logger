@@ -132,17 +132,107 @@ describe("Bunyan", function() {
 
         Logger.info("this is a test statement");
     });
-    it("should succeed in sending data with valid token", function(done) {
-        var splunkBunyanStream = SplunkBunyan.createStream(configurationFile);
+    it("should succeed in sending data as trace with valid token", function(done) {
+        var splunkBunyanStream = SplunkBunyan.createStream({
+            token: configurationFile.token,
+            level: "trace"
+        });
+
+        var run = false;
 
         // Override the default send function
         splunkBunyanStream.stream.send = function(err, resp, body) {
             assert.ok(!err);
+            assert.ok(run);
             assert.strictEqual(resp.headers["content-type"], "application/json; charset=UTF-8");
             assert.strictEqual(resp.body, body);
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
             done();
+        };
+
+        // Wrap the write function to test that the level works
+        var write = splunkBunyanStream.stream.write;
+        splunkBunyanStream.stream.write = function(data) {
+            run = true;
+            assert.ok(data);
+            assert.strictEqual(data.level, 10);
+            splunkBunyanStream.stream.write = write;
+            this.write(data);
+        };
+
+        var Logger = bunyan.createLogger({
+            name: "a bunyan logger",
+            streams: [
+                splunkBunyanStream
+            ]
+        });
+
+        Logger.trace("this is a test statement");
+    });
+    it("should succeed in sending data as debug with valid token", function(done) {
+        var splunkBunyanStream = SplunkBunyan.createStream({
+            token: configurationFile.token,
+            level: "debug"
+        });
+
+        var run = false;
+
+        // Override the default send function
+        splunkBunyanStream.stream.send = function(err, resp, body) {
+            assert.ok(!err);
+            assert.ok(run);
+            assert.strictEqual(resp.headers["content-type"], "application/json; charset=UTF-8");
+            assert.strictEqual(resp.body, body);
+            assert.strictEqual(body.text, successBody.text);
+            assert.strictEqual(body.code, successBody.code);
+            done();
+        };
+
+        // Wrap the write function to test that the level works
+        var write = splunkBunyanStream.stream.write;
+        splunkBunyanStream.stream.write = function(data) {
+            run = true;
+            assert.ok(data);
+            assert.strictEqual(data.level, 20);
+            splunkBunyanStream.stream.write = write;
+            this.write(data);
+        };
+
+        var Logger = bunyan.createLogger({
+            name: "a bunyan logger",
+            streams: [
+                splunkBunyanStream
+            ],
+            level: "debug"
+        });
+
+        Logger.debug("this is a test statement");
+    });
+    it("should succeed in sending data as info with valid token", function(done) {
+        var splunkBunyanStream = SplunkBunyan.createStream(configurationFile);
+
+        var run = false;
+
+        // Override the default send function
+        splunkBunyanStream.stream.send = function(err, resp, body) {
+            assert.ok(!err);
+            assert.ok(run);
+            assert.strictEqual(resp.headers["content-type"], "application/json; charset=UTF-8");
+            assert.strictEqual(resp.body, body);
+            assert.strictEqual(body.text, successBody.text);
+            assert.strictEqual(body.code, successBody.code);
+            done();
+        };
+
+        // Wrap the write function to test that the level works
+        var write = splunkBunyanStream.stream.write;
+        splunkBunyanStream.stream.write = function(data) {
+            run = true;
+            assert.ok(data);
+            assert.strictEqual(data.level, 30);
+            splunkBunyanStream.stream.write = write;
+            this.write(data);
         };
 
         var Logger = bunyan.createLogger({
@@ -153,6 +243,114 @@ describe("Bunyan", function() {
         });
 
         Logger.info("this is a test statement");
+    });
+    it("should succeed in sending data as warn with valid token", function(done) {
+        var splunkBunyanStream = SplunkBunyan.createStream(configurationFile);
+
+        var run = false;
+
+        // Override the default send function
+        splunkBunyanStream.stream.send = function(err, resp, body) {
+            assert.ok(!err);
+            assert.ok(run);
+            assert.strictEqual(resp.headers["content-type"], "application/json; charset=UTF-8");
+            assert.strictEqual(resp.body, body);
+            assert.strictEqual(body.text, successBody.text);
+            assert.strictEqual(body.code, successBody.code);
+            done();
+        };
+
+        // Wrap the write function to test that the level works
+        var write = splunkBunyanStream.stream.write;
+        splunkBunyanStream.stream.write = function(data) {
+            run = true;
+            assert.ok(data);
+            assert.strictEqual(data.level, 40);
+            splunkBunyanStream.stream.write = write;
+            this.write(data);
+        };
+
+
+        var Logger = bunyan.createLogger({
+            name: "a bunyan logger",
+            streams: [
+                splunkBunyanStream
+            ]
+        });
+
+        Logger.warn("this is a test statement");
+    });
+    it("should succeed in sending data as error with valid token", function(done) {
+        var splunkBunyanStream = SplunkBunyan.createStream(configurationFile);
+
+        var run = false;
+
+        // Override the default send function
+        splunkBunyanStream.stream.send = function(err, resp, body) {
+            assert.ok(!err);
+            assert.ok(run);
+            assert.strictEqual(resp.headers["content-type"], "application/json; charset=UTF-8");
+            assert.strictEqual(resp.body, body);
+            assert.strictEqual(body.text, successBody.text);
+            assert.strictEqual(body.code, successBody.code);
+            done();
+        };
+
+        // Wrap the write function to test that the level works
+        var write = splunkBunyanStream.stream.write;
+        splunkBunyanStream.stream.write = function(data) {
+            run = true;
+            assert.ok(data);
+            assert.strictEqual(data.level, 50);
+            splunkBunyanStream.stream.write = write;
+            this.write(data);
+        };
+
+        var Logger = bunyan.createLogger({
+            name: "a bunyan logger",
+            streams: [
+                splunkBunyanStream
+            ],
+            level: "error"
+        });
+
+        Logger.error("this is a test statement");
+    });
+    it("should succeed in sending data as fatal with valid token", function(done) {
+        var splunkBunyanStream = SplunkBunyan.createStream(configurationFile);
+
+        var run = false;
+
+        // Override the default send function
+        splunkBunyanStream.stream.send = function(err, resp, body) {
+            assert.ok(!err);
+            assert.ok(run);
+            assert.strictEqual(resp.headers["content-type"], "application/json; charset=UTF-8");
+            assert.strictEqual(resp.body, body);
+            assert.strictEqual(body.text, successBody.text);
+            assert.strictEqual(body.code, successBody.code);
+            done();
+        };
+
+        // Wrap the write function to test that the level works
+        var write = splunkBunyanStream.stream.write;
+        splunkBunyanStream.stream.write = function(data) {
+            run = true;
+            assert.ok(data);
+            assert.strictEqual(data.level, 60);
+            splunkBunyanStream.stream.write = write;
+            this.write(data);
+        };
+
+        var Logger = bunyan.createLogger({
+            name: "a bunyan logger",
+            streams: [
+                splunkBunyanStream
+            ],
+            level: "fatal"
+        });
+
+        Logger.fatal("this is a test statement");
     });
     it("should succeed in sending array data with valid token", function(done) {
         var splunkBunyanStream = SplunkBunyan.createStream(configurationFile);
@@ -175,28 +373,6 @@ describe("Bunyan", function() {
         });
 
         Logger.info([1, 2, 3]);
-    });
-    it("should succeed in sending array data with error level with valid token", function(done) {
-        var splunkBunyanStream = SplunkBunyan.createStream(configurationFile);
-
-        // Override the default send function
-        splunkBunyanStream.stream.send = function(err, resp, body) {
-            assert.ok(!err);
-            assert.strictEqual(resp.headers["content-type"], "application/json; charset=UTF-8");
-            assert.strictEqual(resp.body, body);
-            assert.strictEqual(body.text, successBody.text);
-            assert.strictEqual(body.code, successBody.code);
-            done();
-        };
-
-        var Logger = bunyan.createLogger({
-            name: "a bunyan logger",
-            streams: [
-                splunkBunyanStream
-            ]
-        });
-
-        Logger.error([1, 2, 3]);
     });
     it("should succeed in sending context as object with valid token", function(done) {
         var splunkBunyanStream = SplunkBunyan.createStream(configurationFile);
