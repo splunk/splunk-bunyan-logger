@@ -4,19 +4,36 @@ var url = require("url");
 
 var SplunkLogger = require("splunk-logging");
 
-// Default callbacks
-function _error(err) {
-    console.log("Error in splunk-bunyan-logger:", err);
-}
+var levels = {
+    trace: "trace",
+    debug: "debug",
+    info: "info",
+    warn: "warn",
+    error: "error",
+    fatal: "fatal"
+};
 
-function _send(err, resp, body) {
-    if (err) {
-        console.log("Error when sending request from splunk-bunyan-logger:", err);
+function severityFromLevel(level) {
+    switch(level) {
+        case levels.trace:
+            return "trace";
+        case levels.debug:
+            return "debug";
+        case levels.warn:
+            return "warn";
+        case levels.error:
+            return "error";
+        case levels.fatal:
+            return "fatal";
+        default:
+            return "info";
     }
 }
 
-function _end(callback) {
-    callback();
+
+// TODO: add as prototype?
+// Default callbacks
+function _send(err, resp, body) {
 }
 
 /** 
@@ -31,12 +48,13 @@ var SplunkStream = function (config) {
         this.logger.config.name = "splunk-bunyan-logger/0.8.0";
     }
 
-    this.error = _error;
+    // Overwrite the common error callback
+    var that = this;
+    this.logger.error = function(err) {
+        that.emit("error", err);
+    };
+
     this.send = _send;
-    this.end = _end;
-    SplunkStream.prototype.on("error", this.error);
-    SplunkStream.prototype.on("end", this.end);
-    
 };
 util.inherits(SplunkStream, Stream);
 
@@ -57,35 +75,23 @@ SplunkStream.prototype.config = function() {
  *
  * The config parameter is optional, and can be overridden per event
  */
-SplunkStream.prototype.write = function (context) {    
-    if (!context) {
+SplunkStream.prototype.write = function (data) {
+    if (!data) {
         this.emit("error", new Error("Must pass a parameter to write."));
         return;
     }
 
-    var config = this.logger._initializeConfig(context.config || this.config());
-
-    var data = context.data;
-    // Special cases, none of the expected keys are found, so treat context as the data
-    if (typeof context === "string") {
-        data = context;
-    }
-    else if (!context.hasOwnProperty("data") && 
-             !context.hasOwnProperty("config") &&
-             !context.hasOwnProperty("requestOptions")) {
-        data = context;
-    }
-
 
     // TODO: for the time, run Date.parse(event.time) / 1000; // to strip out the ms
-    /** Values provided by Bunyan
+    // TODO: name, should this overwrite this.config().name?
+    // TODO: msg, if it's "" we can clean it up
+    /** Unparsed values provided by Bunyan
      * v: Required. Integer. Added by Bunyan. Cannot be overriden.
      *      This is the Bunyan log format version (require('bunyan').LOG_VERSION).
      *      The log version is a single integer. 0 is until I release a version "1.0.0" of node-bunyan.
      *      Thereafter, starting with 1, this will be incremented if there is any backward incompatible change
      *      to the log record format.
      *      Details will be in "CHANGES.md" (the change log).
-     * level: Required. Integer. Added by Bunyan. Cannot be overriden. See the "Levels" section.
      * name: Required. String. Provided at Logger creation.
      *      You must specify a name for your logger when creating it.
      *      Typically this is the name of the service/app using Bunyan for logging.
@@ -110,21 +116,30 @@ SplunkStream.prototype.write = function (context) {
      *  }
      */
 
-    // TODO: add a test passing through the this.error callback somehow
-    var param = {
-        config: config,
-        data: data
+    var context = {
+        data: data,
+        severity: severityFromLevel(data.level)
     };
-    this.logger.send(param, this.send);
+
+    // Remove used properties, TODO: finish up
+    delete context.data.level;
+
+    var that = this;
+    this.logger.send(context, function(err, resp, body) {
+        if (err) {
+            that.emit("error", err, that.logger._initializeContext(context));
+        }
+        else {
+            that.send(err, resp, body);
+        }
+    });
 };
 
 module.exports =  {
     /**
      * TODO: docs
      */
-    levels: {
-        info: "info"
-    },
+    levels: levels,
     /**
      * TODO: docs
      *
@@ -141,6 +156,13 @@ module.exports =  {
              */
             use: function(middleware) {
                 this.stream.logger.use(middleware);
+            },
+            /**
+             * TODO: docs
+             *
+             */
+            flush: function(callback) {
+                this.stream.logger.flush(callback);
             },
             stream: stream
         };
