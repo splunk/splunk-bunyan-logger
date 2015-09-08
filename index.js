@@ -30,12 +30,6 @@ function severityFromLevel(level) {
     }
 }
 
-
-// TODO: add as prototype?
-// Default callbacks
-function _send(err, resp, body) {
-}
-
 /** 
  * TODO: docs
  * SplunkStream - a class that implements a writable stream
@@ -54,7 +48,8 @@ var SplunkStream = function (config) {
         that.emit("error", err);
     };
 
-    this.send = _send;
+    // Default callback is noop
+    this.send = function(err, resp, body) {};
 };
 util.inherits(SplunkStream, Stream);
 
