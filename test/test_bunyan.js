@@ -21,24 +21,6 @@ var successBody = {
     code: 0
 };
 
-// TODO: remove these?
-// Backup console.log so we can restore it later
-var ___log = console.log;
-/**
- * Silences console.log
- * Undo this effect by calling unmute().
- */
-function mute() {
-    console.log = function(){};
-}
-
-/**
- * Un-silences console.log
- */
-function unmute() {
-    console.log = ___log;
-}
-
 describe("Bunyan", function() {
     it("should create logger with SplunkStream", function() {
         var splunkBunyanStream = SplunkBunyan.createStream(configurationFile);

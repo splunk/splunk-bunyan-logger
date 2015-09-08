@@ -22,24 +22,6 @@ var successBody = {
     code: 0
 };
 
-// TODO: remove?
-// Backup console.log so we can restore it later
-var ___log = console.log;
-/**
- * Silences console.log
- * Undo this effect by calling unmute().
- */
-function mute() {
-    console.log = function(){};
-}
-
-/**
- * Un-silences console.log
- */
-function unmute() {
-    console.log = ___log;
-}
-
 function formatForBunyan(data) {
     var ret = {
         name: "a bunyan logger",
