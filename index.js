@@ -13,6 +13,12 @@ var levels = {
     fatal: "fatal"
 };
 
+/**
+ * TODO: docs
+ * 
+ * Translates bunyan logging level number to name of the level.
+ *
+ */
 function severityFromLevel(level) {
     switch(level) {
         case 10:
@@ -63,7 +69,6 @@ SplunkStream.prototype.config = function() {
 
 /**
  * TODO: docs
-
  * Since this is implemented as a "raw" stream, we get passed a full JS object - a single log event
  * if user calls Logger.info({"some": "value"}); then the msg field will be an empty string
  * any keys on that object will be at the top level of the JSON
@@ -76,9 +81,7 @@ SplunkStream.prototype.write = function (data) {
         return;
     }
 
-    // TODO: for the time, run Date.parse(event.time) / 1000; // to strip out the ms
-    // TODO: name, should this overwrite this.config().name?
-    // TODO: msg, if it's "" we can clean it up
+    // TODO: remove after addressing all questions.
     /** Unparsed values provided by Bunyan
      * v: Required. Integer. Added by Bunyan. Cannot be overriden.
      *      This is the Bunyan log format version (require('bunyan').LOG_VERSION).
@@ -110,13 +113,45 @@ SplunkStream.prototype.write = function (data) {
      *  }
      */
 
+
+    // TODO: answer these questions about bunyan's provided fields
+    // TODO: data.name, should this overwrite this.config().name?
+    // TODO: data.msg === "" when doing Logger.info({some: "value"})
+    //      do we want to delete data.msg?
+
     var context = {
         data: data,
-        severity: severityFromLevel(data.level)
+        severity: severityFromLevel(data.level),
+        time: data.time,
+        host: data.hostname
     };
 
-    // Remove used properties, TODO: finish up
+    // Remove properties already added to the context
+    // TODO: should these deletes be configurable?
     delete context.data.level;
+    delete context.data.time;
+    delete context.data.hostname;
+    delete context.data.severity;
+
+    // Clean up any existing metadata
+    // TODO: should the deletes be configurable?
+    if (data.host) {
+        // TODO: Do we want this for host? This will override the hostname provided by Bunyan
+        context.host = data.host;
+        delete data.host;
+    }
+    if (data.source) {
+        context.source = data.source;
+        delete data.source;
+    }
+    if (data.sourcetype) {
+        context.sourcetype = data.sourcetype;
+        delete data.sourcetype;
+    }
+    if (data.index) {
+        context.index = data.index;
+        delete data.index;
+    }
 
     var that = this;
     this.logger.send(context, function(err, resp, body) {
@@ -143,7 +178,7 @@ module.exports =  {
         return {
             /**
              * TODO: docs
-             * The logging level for Bunyan, defaults to info.
+             * The logging level name for Bunyan, defaults to info.
              */
             level: config.level || this.levels.info,
             type: "raw",
@@ -154,6 +189,14 @@ module.exports =  {
              */
             use: function(middleware) {
                 this.stream.logger.use(middleware);
+            },
+            /**
+             * TODO: docs
+             *
+             * Syntactical sugar
+             */
+            on: function(event, callback) {
+                this.stream.on(event, callback);
             },
             /**
              * TODO: docs
