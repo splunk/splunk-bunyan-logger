@@ -2,7 +2,7 @@ var Stream = require("stream").Writable;
 var util = require("util");
 var url = require("url");
 
-var SplunkLogger = require("splunk-logging");
+var SplunkLogger = require("splunk-logging").Logger;
 
 var levels = {
     trace: "trace",
