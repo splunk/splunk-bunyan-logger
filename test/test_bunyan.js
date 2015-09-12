@@ -95,7 +95,7 @@ describe("Bunyan", function() {
                 splunkBunyanStream
             ]
         });
-
+        
         Logger.info("this is a test statement");
     });
     it("should error sending data with invalid token", function(done) {
@@ -527,10 +527,10 @@ describe("Bunyan", function() {
         Logger.info("this is a test statement");
         Logger.info("this is a test statement");
     });
-    it("should succeed in sending data twice with valid token with manual batching", function(done) {
+    it("should succeed in sending data twice with valid token with autoFlush off", function(done) {
         var config = {
             token: configurationFile.token,
-            batching: "manual"
+            autoFlush: false
         };
         var splunkBunyanStream = SplunkBunyan.createStream(config);
 

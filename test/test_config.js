@@ -45,12 +45,12 @@ describe("createStream", function() {
         assert.strictEqual("https", splunkBunyanStream.stream.config().protocol);
         assert.strictEqual("info", splunkBunyanStream.stream.config().level);
         assert.strictEqual(8088, splunkBunyanStream.stream.config().port);
-        assert.strictEqual("off", splunkBunyanStream.stream.config().batching);
+        assert.strictEqual(true, splunkBunyanStream.stream.config().autoFlush);
     });
     it("should create logger with manual batching enabled", function() {
         var config = {
             token: "a-token-goes-here-usually",
-            batching: "manual"
+            autoFlush: false
         };
         var splunkBunyanStream = splunkBunyan.createStream(config);
 
@@ -68,7 +68,7 @@ describe("createStream", function() {
         assert.strictEqual("https", splunkBunyanStream.stream.config().protocol);
         assert.strictEqual("info", splunkBunyanStream.stream.config().level);
         assert.strictEqual(8088, splunkBunyanStream.stream.config().port);
-        assert.strictEqual("manual", splunkBunyanStream.stream.config().batching);
+        assert.strictEqual(false, splunkBunyanStream.stream.config().autoFlush);
     });
     it("should create logger with non-default name", function() {
         var config = {

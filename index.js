@@ -1,44 +1,57 @@
 var Stream = require("stream").Writable;
 var util = require("util");
-var url = require("url");
 
 var SplunkLogger = require("splunk-logging").Logger;
 
+/**
+ * Logging levels.
+ *
+ * @default info
+ * @readonly
+ * @enum {string}
+ */
 var levels = {
-    trace: "trace",
-    debug: "debug",
-    info: "info",
-    warn: "warn",
-    error: "error",
-    fatal: "fatal"
+    TRACE: "trace",
+    DEBUG: "debug",
+    INFO: "info",
+    WARN: "warn",
+    ERROR: "error",
+    FATAL: "fatal"
 };
 
 /**
- * TODO: docs
- * 
  * Translates bunyan logging level number to name of the level.
  *
+ * @param {number} level - A Bunyan logging level integer. TODO: see more
+ * @returns {string}
  */
 function severityFromLevel(level) {
     switch(level) {
         case 10:
-            return levels.trace;
+            return levels.TRACE;
         case 20:
-            return levels.debug;
+            return levels.DEBUG;
         case 40:
-            return levels.warn;
+            return levels.WARN;
         case 50:
-            return levels.error;
+            return levels.ERROR;
         case 60:
-            return levels.fatal;
+            return levels.FATAL;
         default:
-            return levels.info;
+            return levels.INFO;
     }
 }
 
 /** 
  * TODO: docs
  * SplunkStream - a class that implements a writable stream
+ */
+
+/**
+ *
+ * @param config
+ * @constructor
+ * @inheritDoc
  */
 var SplunkStream = function (config) {
     this.logger = new SplunkLogger(config);
@@ -55,6 +68,7 @@ var SplunkStream = function (config) {
     };
 
     // Default callback is noop
+    /* jshint unused:false */
     this.send = function(err, resp, body) {};
 };
 util.inherits(SplunkStream, Stream);
@@ -80,6 +94,7 @@ SplunkStream.prototype.write = function (data) {
         this.emit("error", new Error("Must pass a parameter to write."));
         return;
     }
+    
 
     // TODO: remove after addressing all questions.
     /** Unparsed values provided by Bunyan
@@ -113,46 +128,38 @@ SplunkStream.prototype.write = function (data) {
      *  }
      */
 
-
-    // TODO: answer these questions about bunyan's provided fields
-    // TODO: data.name, should this overwrite this.config().name?
-    // TODO: data.msg === "" when doing Logger.info({some: "value"})
-    //      do we want to delete data.msg?
-
     var context = {
-        data: data,
+        message: data,
         severity: severityFromLevel(data.level),
-        time: data.time,
-        host: data.hostname
+        metadata: {
+            time: data.time,
+            host: data.hostname
+        }
     };
-
+    
     // Remove properties already added to the context
-    // TODO: should these deletes be configurable?
-    delete context.data.level;
-    delete context.data.time;
-    delete context.data.hostname;
-    delete context.data.severity;
+    delete context.message.level;
+    delete context.message.time;
+    delete context.message.hostname;
 
     // Clean up any existing metadata
-    // TODO: should the deletes be configurable?
-    if (data.host) {
-        // TODO: Do we want this for host? This will override the hostname provided by Bunyan
-        context.host = data.host;
+    if (data.host) { // TODO: convert to hasOwnProperty checks
+        context.metadata.host = data.host;
         delete data.host;
     }
     if (data.source) {
-        context.source = data.source;
+        context.metadata.source = data.source;
         delete data.source;
     }
     if (data.sourcetype) {
-        context.sourcetype = data.sourcetype;
+        context.metadata.sourcetype = data.sourcetype;
         delete data.sourcetype;
     }
     if (data.index) {
-        context.index = data.index;
+        context.metadata.index = data.index;
         delete data.index;
     }
-
+    
     var that = this;
     this.logger.send(context, function(err, resp, body) {
         if (err) {
@@ -162,6 +169,7 @@ SplunkStream.prototype.write = function (data) {
             that.send(err, resp, body);
         }
     });
+
 };
 
 module.exports =  {
@@ -180,7 +188,7 @@ module.exports =  {
              * TODO: docs
              * The logging level name for Bunyan, defaults to info.
              */
-            level: config.level || this.levels.info,
+            level: config.level || this.levels.INFO,
             type: "raw",
             /**
              * TODO: docs 

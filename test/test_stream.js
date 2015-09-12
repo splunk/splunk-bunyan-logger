@@ -12,14 +12,14 @@ var assert = require("assert");
  */
 var configurationFile = require("./config.json");
 
-var invalidTokenBody = {
-    text: "Invalid token",
-    code: 4
-};
-
 var successBody = {
     text: "Success",
     code: 0
+};
+
+var invalidTokenBody = {
+    text: "Invalid token",
+    code: 4
 };
 
 function formatForBunyan(data) {
@@ -62,12 +62,42 @@ describe("SplunkStream", function() {
         assert.strictEqual("https", splunkBunyanStream.stream.config().protocol);
         assert.strictEqual("info", splunkBunyanStream.stream.config().level);
         assert.strictEqual(8088, splunkBunyanStream.stream.config().port);
-        assert.strictEqual("off", splunkBunyanStream.stream.config().batching);
+        assert.strictEqual(true, splunkBunyanStream.stream.config().autoFlush);
 
         var sendCallback = splunkBunyanStream.stream.send;
         splunkBunyanStream.stream.send = function(err, resp, body) {
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
+            sendCallback(err, resp, body);
+            done();
+        };
+
+        var data = "something";
+
+        splunkBunyanStream.stream.write(formatForBunyan(data));
+    });
+    it("should error when writing a string with bad token", function(done) {
+        var config = {
+            token: "bad-token"
+        };
+
+        var splunkBunyanStream = splunkBunyan.createStream(config);
+
+        assert.ok(splunkBunyanStream);
+        assert.strictEqual("info", splunkBunyanStream.level);
+        assert.strictEqual("raw", splunkBunyanStream.type);
+        assert.strictEqual(config.token, splunkBunyanStream.stream.config().token);
+        assert.strictEqual("splunk-bunyan-logger/0.8.0", splunkBunyanStream.stream.config().name);
+        assert.strictEqual("localhost", splunkBunyanStream.stream.config().host);
+        assert.strictEqual("https", splunkBunyanStream.stream.config().protocol);
+        assert.strictEqual("info", splunkBunyanStream.stream.config().level);
+        assert.strictEqual(8088, splunkBunyanStream.stream.config().port);
+        assert.strictEqual(true, splunkBunyanStream.stream.config().autoFlush);
+
+        var sendCallback = splunkBunyanStream.stream.send;
+        splunkBunyanStream.stream.send = function(err, resp, body) {
+            assert.strictEqual(body.text, invalidTokenBody.text);
+            assert.strictEqual(body.code, invalidTokenBody.code);
             sendCallback(err, resp, body);
             done();
         };
