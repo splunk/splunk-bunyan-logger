@@ -42,6 +42,7 @@ describe("Bunyan", function() {
 
         assert.ok(Logger);
         assert.strictEqual("a bunyan logger", Logger.fields.name);
+        assert.strictEqual(bunyan.resolveLevel("info"), Logger.level());
         assert.strictEqual(1, Logger.streams.length);
         assert.strictEqual(splunkBunyanStream.stream, Logger.streams[0].stream);
     });
@@ -95,7 +96,7 @@ describe("Bunyan", function() {
                 splunkBunyanStream
             ]
         });
-
+        
         Logger.info("this is a test statement");
     });
     it("should error sending data with invalid token", function(done) {
@@ -527,10 +528,10 @@ describe("Bunyan", function() {
         Logger.info("this is a test statement");
         Logger.info("this is a test statement");
     });
-    it("should succeed in sending data twice with valid token with manual batching", function(done) {
+    it("should succeed in sending data twice with valid token with autoFlush off", function(done) {
         var config = {
             token: configurationFile.token,
-            batching: "manual"
+            autoFlush: false
         };
         var splunkBunyanStream = SplunkBunyan.createStream(config);
 

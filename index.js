@@ -1,46 +1,35 @@
 var Stream = require("stream").Writable;
 var util = require("util");
-var url = require("url");
 
 var SplunkLogger = require("splunk-logging").Logger;
 
-var levels = {
-    trace: "trace",
-    debug: "debug",
-    info: "info",
-    warn: "warn",
-    error: "error",
-    fatal: "fatal"
-};
-
 /**
- * TODO: docs
- * 
- * Translates bunyan logging level number to name of the level.
+ * A class that implements a raw writable stream.
  *
- */
-function severityFromLevel(level) {
-    switch(level) {
-        case 10:
-            return levels.trace;
-        case 20:
-            return levels.debug;
-        case 40:
-            return levels.warn;
-        case 50:
-            return levels.error;
-        case 60:
-            return levels.fatal;
-        default:
-            return levels.info;
-    }
-}
-
-/** 
- * TODO: docs
- * SplunkStream - a class that implements a writable stream
+ * @property {object} config - Configuration settings for this <code>SplunkStream</code> instance.
+ * @property {function[]} middlewares - Middleware functions to run before sending data to Splunk. See {@link SplunkLogger#use}
+ * @property {object[]} contextQueue - Queue of <code>context</code> objects to be sent to Splunk.
+ * @property {function} error - A callback function for errors: <code>function(err, context)</code>.
+ * Defaults to <code>console.log</code> both values;
+ *
+ * @param {object} config - Configuration settings for a new [SplunkLogger]{@link SplunkLogger}.
+ * @param {string} config.token - Splunk HTTP Event Collector token, required.
+ * @param {string} [config.name=splunk-javascript-logging/0.8.0] - Name for this logger.
+ * @param {string} [config.host=localhost] - Hostname or IP address of Splunk server.
+ * @param {string} [config.path=/services/collector/event/1.0] - URL path to send data to on the Splunk server.
+ * @param {string} [config.protocol=https] - Protocol used to communicate with the Splunk server, <code>http</code> or <code>https</code>.
+ * @param {number} [config.port=8088] - HTTP Event Collector port on the Splunk server.
+ * @param {string} [config.url] - URL string to pass to {@link https://nodejs.org/api/url.html#url_url_parsing|url.parse}. This will try to set
+ * <code>host</code>, <code>path</code>, <code>protocol</code>, <code>port</code>, <code>url</code>. Any of these values will be overwritten if 
+ * the corresponding property is set on <code>config</code>.
+ * @param {string} [config.level=info] - Logging level to use, will show up as the <code>severity</code> field of an event, see
+ *  [SplunkLogger.levels]{@link SplunkLogger#levels} for common levels.
+ * @param {bool} [config.autoFlush=true] - Send events immediately or not.
+ * @constructor
+ * @implements {@link https://nodejs.org/api/stream.html#stream_class_stream_writable|Stream.Writable}
  */
 var SplunkStream = function (config) {
+    /** @type {SplunkLogger} */
     this.logger = new SplunkLogger(config);
 
     // If using the common logger's default name, change it
@@ -48,32 +37,43 @@ var SplunkStream = function (config) {
         this.logger.config.name = "splunk-bunyan-logger/0.8.0";
     }
 
-    // Overwrite the common error callback
+    // Overwrite the common library's error callback
     var that = this;
     this.logger.error = function(err) {
         that.emit("error", err);
     };
 
-    // Default callback is noop
+    /* jshint unused:false */
+    /**
+     * A callback function called after sending a request to Splunk:
+     *  <code>function(err, response, body)</code>. Defaults
+     * to an empty function.
+     *
+     * @type {function}
+     */
     this.send = function(err, resp, body) {};
 };
 util.inherits(SplunkStream, Stream);
 
 /**
- * TODO: docs
- * Returns the configuration for this logger
+ * Returns the configuration for this logger.
+ * See {@link SplunkStream}.
+ *
+ * @returns {Object} Configuration for this logger.
+ * @public
  */
 SplunkStream.prototype.config = function() {
     return this.logger.config;
 };
 
 /**
- * TODO: docs
- * Since this is implemented as a "raw" stream, we get passed a full JS object - a single log event
- * if user calls Logger.info({"some": "value"}); then the msg field will be an empty string
- * any keys on that object will be at the top level of the JSON
+ * The <code>write()</code> function for <code>SplunkStream</code>.
  *
- * The config parameter is optional, and can be overridden per event
+ * Bunyan will call this function when a user logs a message.
+ * See [Bunyan raw streams]{@link https://github.com/trentm/node-bunyan#stream-type-raw}.
+ *
+ * @param {object} data - The data object is provided by Bunyan.
+ * @public
  */
 SplunkStream.prototype.write = function (data) {
     if (!data) {
@@ -81,78 +81,38 @@ SplunkStream.prototype.write = function (data) {
         return;
     }
 
-    // TODO: remove after addressing all questions.
-    /** Unparsed values provided by Bunyan
-     * v: Required. Integer. Added by Bunyan. Cannot be overriden.
-     *      This is the Bunyan log format version (require('bunyan').LOG_VERSION).
-     *      The log version is a single integer. 0 is until I release a version "1.0.0" of node-bunyan.
-     *      Thereafter, starting with 1, this will be incremented if there is any backward incompatible change
-     *      to the log record format.
-     *      Details will be in "CHANGES.md" (the change log).
-     * name: Required. String. Provided at Logger creation.
-     *      You must specify a name for your logger when creating it.
-     *      Typically this is the name of the service/app using Bunyan for logging.
-     * hostname: Required. String. Provided or determined at Logger creation.
-     *      You can specify your hostname at Logger creation or it will be retrieved vi os.hostname().
-     * pid: Required. Integer. Filled in automatically at Logger creation.
-     * time: Required. String. Added by Bunyan. Can be overriden.
-     *      The date and time of the event in ISO 8601 Extended Format format and in UTC, as from Date.toISOString().
-     * msg: Required. String. Every log.debug(...) et al call must provide a log message.
-     * src: Optional. Object giving log call source info.
-     *      This is added automatically by Bunyan if the "src: true" config option is given to the Logger.
-     *      Never use in production as this is really slow.
-     *
-     * {
-     *      name: 'foo',
-     *      hostname: 'machinename.local',
-     *      pid: 25767,
-     *      level: 30,
-     *      msg: '',
-     *      time: Wed Aug 12 2015 15:22:22 GMT-0700 (PDT),
-     *      v: 0
-     *  }
-     */
-
-
-    // TODO: answer these questions about bunyan's provided fields
-    // TODO: data.name, should this overwrite this.config().name?
-    // TODO: data.msg === "" when doing Logger.info({some: "value"})
-    //      do we want to delete data.msg?
-
     var context = {
-        data: data,
-        severity: severityFromLevel(data.level),
-        time: data.time,
-        host: data.hostname
+        message: data,
+        severity: module.exports.severityFromLevel(data.level),
+        metadata: {
+            time: data.time,
+            host: data.hostname
+        }
     };
-
+    
     // Remove properties already added to the context
-    // TODO: should these deletes be configurable?
-    delete context.data.level;
-    delete context.data.time;
-    delete context.data.hostname;
-    delete context.data.severity;
+    delete context.message.level;
+    delete context.message.time;
+    delete context.message.hostname;
 
     // Clean up any existing metadata
-    // TODO: should the deletes be configurable?
-    if (data.host) {
-        // TODO: Do we want this for host? This will override the hostname provided by Bunyan
-        context.host = data.host;
+    if (data.hasOwnProperty("host")) {
+        context.metadata.host = data.host;
         delete data.host;
     }
-    if (data.source) {
-        context.source = data.source;
+    if (data.hasOwnProperty("source")) {
+        context.metadata.source = data.source;
         delete data.source;
     }
-    if (data.sourcetype) {
-        context.sourcetype = data.sourcetype;
+    if (data.hasOwnProperty("sourcetype")) {
+        context.metadata.sourcetype = data.sourcetype;
         delete data.sourcetype;
     }
-    if (data.index) {
-        context.index = data.index;
+    if (data.hasOwnProperty("index")) {
+        context.metadata.index = data.index;
         delete data.index;
     }
-
+    
     var that = this;
     this.logger.send(context, function(err, resp, body) {
         if (err) {
@@ -164,44 +124,191 @@ SplunkStream.prototype.write = function (data) {
     });
 };
 
+/**
+ * Splunk Bunyan Logger module, to be used with [Bunyan]{@link https://www.npmjs.com/package/bunyan}.
+ * 
+ * @example <caption>With event auto flush (default), each log will make an HTTP request.</caption>
+ * var bunyan = require("bunyan");
+ * var SplunkBunyanLogger = require("splunk-bunyan-logger");
+ *
+ * var config = {
+ *     token: "your-token-here",
+ *     level: "info",
+ *     autoFlush: false
+ * };
+ * var splunkStream = SplunkBunyanLogger.createStream(config);
+ *
+ * // Custom error handling by listening for the <code>error</code> event
+ * splunkStream.on("error", function(err) {
+ *     // Do something with the error.
+ * });
+ *
+ * // Optional: add any custom express-like middleware function(s) to the chain
+ * splunkStream.use(function(context, next) {
+ *     context.data.extraProperty = "added in middleware";      
+ *
+ *     var error = null;
+ *     next(error, context);
+ * });
+ *
+ * // Setup Bunyan with the splunkStream we just configured
+ * var Logger = bunyan.createLogger({
+ *     name: "my logger",
+ *     streams: [
+ *         splunkStream
+ *     ]
+ * });
+ * 
+ * // Payload to send to Event Collector
+ * var payload = {
+ *     temperature: "70F",
+ *     chickenCount: 500,
+ *     source: "chicken coop",
+ *     sourcetype: "httpevent",
+ *     index: "main",
+ *     host: "farm.local",
+ *     severity: "info"
+ * };
+ * 
+ * // Send the event to Splunk!
+ * Logger.info(payload, "description of payload");
+ *
+ *
+ * @example <caption>Without event auto flush, you must manually call <code>flush()</code> to send events.</caption>
+ * var bunyan = require("bunyan");
+ * var SplunkBunyanLogger = require("splunk-bunyan-logger");
+ *
+ * var config = {
+ *     token: "your-token-here",
+ *     level: "info",
+ *     autoFlush: true
+ * };
+ * var splunkStream = SplunkBunyanLogger.createStream(config);
+ *
+ * // Custom error handling by listening for the <code>error</code> event
+ * splunkStream.on("error", function(err) {
+ *     // Do something with the error.
+ * });
+ *
+ * // Optional: add any custom express-like middleware function(s) to the chain
+ * splunkStream.use(function(context, next) {
+ *     context.data.extraProperty = "added in middleware";      
+ *
+ *     var error = null;
+ *     next(error, context);
+ * });
+ *
+ * // Setup Bunyan with the splunkStream we just configured
+ * var Logger = bunyan.createLogger({
+ *     name: "my logger",
+ *     streams: [
+ *         splunkStream
+ *     ]
+ * });
+ * 
+ * // Payload to send to Event Collector
+ * var payload = {
+ *     temperature: "70F",
+ *     chickenCount: 500,
+ *     source: "chicken coop",
+ *     sourcetype: "httpevent",
+ *     index: "main",
+ *     host: "farm.local",
+ *     severity: "info"
+ * };
+ * 
+ * // Queue some events
+ * Logger.info(payload, "description of payload");
+ * Logger.info(payload, "description of payload");
+ * Logger.info(payload, "description of payload");
+ * Logger.info(payload, "description of payload");
+ * 
+ * // Manually flush, sends all events to Splunk in a single HTTP request
+ * splunkBunyanStream.flush(function(err, resp, body) {
+ *     if (!err) {
+ *         console.log("Success!");
+ *     }
+ * });
+ *
+ * @module SplunkBunyanLogger
+ * @namespace SplunkBunyanLogger
+ */
 module.exports =  {
     /**
-     * TODO: docs
-     */
-    levels: levels,
-    /**
-     * TODO: docs
+     * Bunyan's logging levels.
      *
+     * @default info
+     * @readonly
+     * @enum {string}
+     * @memberof SplunkBunyanLogger
+     */
+    levels: {
+        TRACE: "trace",
+        DEBUG: "debug",
+        INFO: "info",
+        WARN: "warn",
+        ERROR: "error",
+        FATAL: "fatal"
+    },
+    /**
+     * Translates a Bunyan logging level number to the name of the level.
+     *
+     * @param {number} level - A Bunyan logging level integer. See {@link SplunkBunyanLogger.levels}
+     * @returns {string}
+     * @memberof SplunkBunyanLogger
+     */
+    severityFromLevel: function (level) {
+        switch(level) {
+            case 10:
+                return module.exports.levels.TRACE;
+            case 20:
+                return module.exports.levels.DEBUG;
+            case 40:
+                return module.exports.levels.WARN;
+            case 50:
+                return module.exports.levels.ERROR;
+            case 60:
+                return module.exports.levels.FATAL;
+            default:
+                return module.exports.levels.INFO;
+        }
+    },
+    
+    /**
+     * Creates a Bunyan Stream object with the provided <code>config</code>.
+     *
+     * @param {object} config - See {@link SplunkStream}.
+     * @returns {SplunkBunyanStream} A Bunyan Stream object.
+     * @memberof SplunkBunyanLogger
      */
     createStream: function (config) {
         var stream =  new SplunkStream(config);
+        /**
+         * @typedef SplunkBunyanStream
+         * @property {string} level The logging level for Bunyan.
+         * @property {string} type Always <code>raw</code>
+         * @property {function} use Takes a middleware function parameter: <code>function(context, next)</code>,
+         * this function must call <code>next(error, context)</code>.
+         * Adds an express-like middleware function to run before sending the
+         * data to Splunk. Multiple middleware functions can be used, they will be executed
+         * in the order they are added.
+         * @property {function} on Takes an <code>event</code> string, and a callback function.
+         * The most useful event to listen for is <code>error</code>.
+         * See {@link https://nodejs.org/api/events.html#events_emitter_on_event_listener|Node.js events} documentation.
+         * @property {function} flush When <code>config.autoFlush = false</code>, manually sends events to Splunk
+         * all queued events to Splunk in a single HTTP request. Takes a callback
+         * function parameter: <code>function(err, response, body)</code>.
+         * @property {SplunkStream} stream See {@link SplunkStream}
+         */
         return {
-            /**
-             * TODO: docs
-             * The logging level name for Bunyan, defaults to info.
-             */
-            level: config.level || this.levels.info,
+            level: config.level || module.exports.levels.INFO,
             type: "raw",
-            /**
-             * TODO: docs 
-             * Adds a middleware to the SplunkLogger for this instance
-             * Just a convenience method for the common logging interface
-             */
             use: function(middleware) {
                 this.stream.logger.use(middleware);
             },
-            /**
-             * TODO: docs
-             *
-             * Syntactical sugar
-             */
             on: function(event, callback) {
                 this.stream.on(event, callback);
             },
-            /**
-             * TODO: docs
-             *
-             */
             flush: function(callback) {
                 this.stream.logger.flush(callback);
             },
