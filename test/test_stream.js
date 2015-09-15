@@ -1,7 +1,7 @@
 var splunkBunyan = require("../index");
 var assert = require("assert");
 
-/** Integration Tests **/ 
+/** Integration Tests **/
 
 /**
  * Load test configuration from test/config.json
@@ -12,15 +12,38 @@ var assert = require("assert");
  */
 var configurationFile = require("./config.json");
 
+var successBody = {
+    text: "Success",
+    code: 0
+};
+
 var invalidTokenBody = {
     text: "Invalid token",
     code: 4
 };
 
-var successBody = {
-    text: "Success",
-    code: 0
-};
+function formatForBunyan(data) {
+    var ret = {
+        name: "a bunyan logger",
+        hostname: "Shaqbook-15.local",
+        pid: 37509,
+        level: 30,
+        msg: "",
+        time: Date.now() / 1000, // The / 1000 part is for Splunk
+        v: 0
+    };
+
+    if (typeof data === "string") {
+        ret.msg = data;
+    }
+    else {
+        for (var key in data) {
+            ret[key] = data[key];
+        }
+    }
+
+    return ret;
+}
 
 describe("SplunkStream", function() {
     it("should write a string", function(done) {
@@ -39,15 +62,23 @@ describe("SplunkStream", function() {
         assert.strictEqual("https", splunkBunyanStream.stream.config().protocol);
         assert.strictEqual("info", splunkBunyanStream.stream.config().level);
         assert.strictEqual(8088, splunkBunyanStream.stream.config().port);
+        assert.strictEqual(true, splunkBunyanStream.stream.config().autoFlush);
+
+        var sendCallback = splunkBunyanStream.stream.send;
+        splunkBunyanStream.stream.send = function(err, resp, body) {
+            assert.strictEqual(body.text, successBody.text);
+            assert.strictEqual(body.code, successBody.code);
+            sendCallback(err, resp, body);
+            done();
+        };
 
         var data = "something";
 
-        splunkBunyanStream.stream.write(data);
-        splunkBunyanStream.stream.end(done);
+        splunkBunyanStream.stream.write(formatForBunyan(data));
     });
-    it("should write a string when config is also passed", function(done) {
+    it("should error when writing a string with bad token", function(done) {
         var config = {
-            token: configurationFile.token
+            token: "bad-token"
         };
 
         var splunkBunyanStream = splunkBunyan.createStream(config);
@@ -61,23 +92,53 @@ describe("SplunkStream", function() {
         assert.strictEqual("https", splunkBunyanStream.stream.config().protocol);
         assert.strictEqual("info", splunkBunyanStream.stream.config().level);
         assert.strictEqual(8088, splunkBunyanStream.stream.config().port);
+        assert.strictEqual(true, splunkBunyanStream.stream.config().autoFlush);
+
+        var sendCallback = splunkBunyanStream.stream.send;
+        splunkBunyanStream.stream.send = function(err, resp, body) {
+            assert.strictEqual(body.text, invalidTokenBody.text);
+            assert.strictEqual(body.code, invalidTokenBody.code);
+            sendCallback(err, resp, body);
+            done();
+        };
 
         var data = "something";
 
-        splunkBunyanStream.stream.write(config, data);
-        splunkBunyanStream.stream.end(done);
+        splunkBunyanStream.stream.write(formatForBunyan(data));
     });
-    it("should call default error callback", function(done) {
+    it("should emit error from middleware", function(done) {
         var config = {
             token: configurationFile.token
         };
-
         var splunkBunyanStream = splunkBunyan.createStream(config);
-        splunkBunyanStream.use(function(settings, next) {
+
+        var run = false;
+
+        splunkBunyanStream.use(function(context, next) {
+            run = true;
             next(new Error("this is an error!"));
         });
 
-        splunkBunyanStream.stream.write("something");
-        splunkBunyanStream.stream.end(done);
+        splunkBunyanStream.stream.on("error", function(err) {
+            assert.ok(run);
+            assert.ok(err);
+            assert.strictEqual(err.message, "this is an error!");
+            done();
+        });
+
+        splunkBunyanStream.stream.write(formatForBunyan("something"));
+    });
+    it("should emit error when writing without args", function(done) {
+        var config = {
+            token: configurationFile.token
+        };
+        var splunkBunyanStream = splunkBunyan.createStream(config);
+
+        splunkBunyanStream.stream.on("error", function(err) {
+            assert.ok(err);
+            assert.strictEqual(err.message, "Must pass a parameter to write.");
+            done();
+        });
+        splunkBunyanStream.stream.write();
     });
 });
