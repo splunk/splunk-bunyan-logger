@@ -94,8 +94,21 @@ describe("SplunkStream", function() {
         assert.strictEqual(8088, splunkBunyanStream.stream.config().port);
         assert.strictEqual(true, splunkBunyanStream.stream.config().autoFlush);
 
+        var run = false;
+
+        splunkBunyanStream.on("error", function(err, errContext) {
+            run = true;
+            assert.ok(err);
+            assert.strictEqual(err.message, invalidTokenBody.text);
+            assert.strictEqual(err.code, invalidTokenBody.code);
+            assert.ok(errContext);
+            assert.strictEqual(errContext.message.msg, "something");
+        });
+
         var sendCallback = splunkBunyanStream.stream.send;
         splunkBunyanStream.stream.send = function(err, resp, body) {
+            assert.ok(!err);
+            assert.ok(run);
             assert.strictEqual(body.text, invalidTokenBody.text);
             assert.strictEqual(body.code, invalidTokenBody.code);
             sendCallback(err, resp, body);

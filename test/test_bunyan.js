@@ -102,15 +102,27 @@ describe("Bunyan", function() {
     it("should error sending data with invalid token", function(done) {
         var splunkBunyanStream = SplunkBunyan.createStream({token: "bad-token"});
 
+        var run = false;
+
         // Override the default send function
         splunkBunyanStream.stream.send = function(err, resp, body) {
             assert.ok(!err);
+            assert.ok(run);
             assert.strictEqual(resp.headers["content-type"], "application/json; charset=UTF-8");
             assert.strictEqual(resp.body, body);
             assert.strictEqual(body.text, invalidTokenBody.text);
             assert.strictEqual(body.code, invalidTokenBody.code);
             done();
         };
+
+        splunkBunyanStream.on("error", function(err, context) {
+            run = true;
+            assert.ok(err);
+            assert.strictEqual(err.message, invalidTokenBody.text);
+            assert.strictEqual(err.code, invalidTokenBody.code);
+            assert.ok(context);
+            assert.strictEqual(context.message.msg, "this is a test statement");
+        });
 
         var Logger = bunyan.createLogger({
             name: "a bunyan logger",
@@ -432,9 +444,12 @@ describe("Bunyan", function() {
     it("should error in sending data with valid token to wrong index", function(done) {
         var splunkBunyanStream = SplunkBunyan.createStream(configurationFile);
 
+        var run = false;
+
         // Override the default send function
         splunkBunyanStream.stream.send = function(err, resp, body) {
             assert.ok(!err);
+            assert.ok(run);
             assert.strictEqual(resp.headers["content-type"], "application/json; charset=UTF-8");
             assert.strictEqual(resp.body, body);
             assert.strictEqual(body.text, incorrectIndexBody.text);
@@ -442,6 +457,16 @@ describe("Bunyan", function() {
             assert.strictEqual(body["invalid-event-number"], incorrectIndexBody["invalid-event-number"]);
             done();
         };
+
+        splunkBunyanStream.on("error", function(err, errContext) {
+            run = true;
+            assert.ok(err);
+            assert.strictEqual(err.message, incorrectIndexBody.text);
+            assert.strictEqual(err.code, incorrectIndexBody.code);
+            assert.ok(errContext);
+            assert.strictEqual(errContext.metadata.index, "_____different_index");
+            assert.strictEqual(errContext.message.msg, "custom index");
+        });
 
         var Logger = bunyan.createLogger({
             name: "a bunyan logger",

@@ -39,8 +39,8 @@ var SplunkStream = function (config) {
 
     // Overwrite the common library's error callback
     var that = this;
-    this.logger.error = function(err) {
-        that.emit("error", err);
+    this.logger.error = function(err, context) {
+        that.emit("error", err, context);
     };
 
     /* jshint unused:false */
@@ -114,14 +114,7 @@ SplunkStream.prototype.write = function (data) {
     }
     
     var that = this;
-    this.logger.send(context, function(err, resp, body) {
-        if (err) {
-            that.emit("error", err, that.logger._initializeContext(context));
-        }
-        else {
-            that.send(err, resp, body);
-        }
-    });
+    this.logger.send(context, that.send);
 };
 
 /**
