@@ -42,6 +42,7 @@ describe("Bunyan", function() {
 
         assert.ok(Logger);
         assert.strictEqual("a bunyan logger", Logger.fields.name);
+        assert.strictEqual(bunyan.resolveLevel("info"), Logger.level());
         assert.strictEqual(1, Logger.streams.length);
         assert.strictEqual(splunkBunyanStream.stream, Logger.streams[0].stream);
     });
