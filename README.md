@@ -1,8 +1,8 @@
-# Splunk Event Collector Stream for Bunyan (beta)
+# Splunk HTTP Event Collector Stream for Bunyan (beta)
 
 #### Version 0.8.0
 
-This project provides a stream for Splunk's Event Collector to be used with [Bunyan](https://www.npmjs.com/package/bunyan).
+This project provides a stream for Splunk's HTTP Event Collector to be used with [Bunyan](https://www.npmjs.com/package/bunyan).
 
 ## Requirements
 
@@ -95,5 +95,5 @@ You can reach the Developer Platform team at _devinfo@splunk.com_.
 
 ## License
 
-The Splunk Event Collector Stream for Bunyan is licensed under the Apache
+The Splunk HTTP Event Collector Stream for Bunyan is licensed under the Apache
 License 2.0. Details can be found in the LICENSE file.
