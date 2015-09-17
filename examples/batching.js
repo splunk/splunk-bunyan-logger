@@ -25,7 +25,7 @@
  * until flush() is called.
  */
 
-// Change to require("splunk-bunyan-logger").Logger;
+// Change to require("splunk-bunyan-logger");
 var splunkBunyan = require("../index");
 var bunyan = require("bunyan");
 
