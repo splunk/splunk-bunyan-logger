@@ -22,6 +22,7 @@ See the `examples` folder for more examples:
 * `basic.js`: shows how to configure a Bunyan stream and send a log message to Splunk.
 * `batching.js`: shows how to queue log messages, and send them in batches.
 * `middleware.js`: shows how to add an express-like middleware function to be called before sending log messages to Splunk.
+* `retry.js`: shows how to configure retries on errors.
 
 ### Basic example
 
