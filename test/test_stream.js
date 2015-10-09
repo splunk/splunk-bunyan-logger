@@ -79,6 +79,7 @@ describe("SplunkStream", function() {
         assert.strictEqual("info", splunkBunyanStream.stream.config().level);
         assert.strictEqual(8088, splunkBunyanStream.stream.config().port);
         assert.strictEqual(true, splunkBunyanStream.stream.config().autoFlush);
+        assert.strictEqual(0, splunkBunyanStream.stream.config().maxRetries);
 
         var sendCallback = splunkBunyanStream.stream.send;
         splunkBunyanStream.stream.send = function(err, resp, body) {
@@ -169,5 +170,82 @@ describe("SplunkStream", function() {
             done();
         });
         splunkBunyanStream.stream.write();
+    });
+    it("should not retry on Splunk error", function(done) {
+        var config = {
+            token: "bad-token",
+            maxRetries: 5
+        };
+        var splunkBunyanStream = splunkBunyan.createStream(config);
+
+        var retryCount = 0;
+
+        // Wrap the _post so we can verify retries
+        var post = splunkBunyanStream.stream.logger._post;
+        splunkBunyanStream.stream.logger._post = function(requestOptions, callback) {
+            retryCount++;
+            post(requestOptions, callback);
+        };
+
+        splunkBunyanStream.stream.on("error", function(err) {
+            assert.ok(err);
+            assert.strictEqual(invalidTokenBody.code, err.code);
+            assert.strictEqual(invalidTokenBody.text, err.message);
+            assert.strictEqual(1, retryCount);
+            done();
+        });
+        splunkBunyanStream.stream.write("something");
+    });
+    it("should retry on network error, bad host", function(done) {
+        this.timeout(3 * 1000);
+        var config = {
+            token: configurationFile.token,
+            maxRetries: 3,
+            host: "splunk.invalid"
+        };
+        var splunkBunyanStream = splunkBunyan.createStream(config);
+
+        var retryCount = 0;
+
+        // Wrap the _post so we can verify retries
+        var post = splunkBunyanStream.stream.logger._post;
+        splunkBunyanStream.stream.logger._post = function(requestOptions, callback) {
+            retryCount++;
+            post(requestOptions, callback);
+        };
+
+        splunkBunyanStream.stream.on("error", function(err) {
+            assert.ok(err);
+            assert.strictEqual("ENOTFOUND", err.code);
+            assert.strictEqual(config.maxRetries + 1, retryCount);
+            done();
+        });
+        splunkBunyanStream.stream.write("something");
+    });
+    it("should retry on network error, wrong port", function(done) {
+        this.timeout(3 * 1000);
+        var config = {
+            token: configurationFile.token,
+            maxRetries: 3,
+            port: 1075
+        };
+        var splunkBunyanStream = splunkBunyan.createStream(config);
+
+        var retryCount = 0;
+
+        // Wrap the _post so we can verify retries
+        var post = splunkBunyanStream.stream.logger._post;
+        splunkBunyanStream.stream.logger._post = function(requestOptions, callback) {
+            retryCount++;
+            post(requestOptions, callback);
+        };
+
+        splunkBunyanStream.stream.on("error", function(err) {
+            assert.ok(err);
+            assert.strictEqual("ECONNREFUSED", err.code);
+            assert.strictEqual(config.maxRetries + 1, retryCount);
+            done();
+        });
+        splunkBunyanStream.stream.write("something");
     });
 });

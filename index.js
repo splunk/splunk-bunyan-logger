@@ -32,6 +32,7 @@ var SplunkLogger = require("splunk-logging").Logger;
  * @param {string} config.token - Splunk HTTP Event Collector token, required.
  * @param {string} [config.name=splunk-javascript-logging/0.8.0] - Name for this logger.
  * @param {string} [config.host=localhost] - Hostname or IP address of Splunk server.
+ * @param {number} [config.maxRetries=0] - How many times to retry when HTTP POST to Splunk fails.
  * @param {string} [config.path=/services/collector/event/1.0] - URL path to send data to on the Splunk server.
  * @param {string} [config.protocol=https] - Protocol used to communicate with the Splunk server, <code>http</code> or <code>https</code>.
  * @param {number} [config.port=8088] - HTTP Event Collector port on the Splunk server.

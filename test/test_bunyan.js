@@ -595,7 +595,7 @@ describe("Bunyan", function() {
             done();
         });
     });
-    it("should get context when middlware calls next(error)", function(done) {
+    it("should get context when middleware calls next(error)", function(done) {
         var splunkBunyanStream = SplunkBunyan.createStream(configurationFile);
 
         var run = false;
@@ -621,5 +621,71 @@ describe("Bunyan", function() {
         });
 
         Logger.info("something");
+    });
+    it("should not retry on Splunk error", function(done) {
+        var config = {
+            token: "bad-token",
+            maxRetries: 5
+        };
+        var splunkBunyanStream = SplunkBunyan.createStream(config);
+
+        var retryCount = 0;
+
+        // Wrap the _post so we can verify retries
+        var post = splunkBunyanStream.stream.logger._post;
+        splunkBunyanStream.stream.logger._post = function(requestOptions, callback) {
+            retryCount++;
+            post(requestOptions, callback);
+        };
+
+        splunkBunyanStream.stream.on("error", function(err) {
+            assert.ok(err);
+            assert.strictEqual(invalidTokenBody.code, err.code);
+            assert.strictEqual(invalidTokenBody.text, err.message);
+            assert.strictEqual(1, retryCount);
+            done();
+        });
+
+        var Logger = bunyan.createLogger({
+            name: "a bunyan logger",
+            streams: [
+                splunkBunyanStream
+            ]
+        });
+
+        Logger.info("this is a test statement");
+    });
+    it("should retry on network error", function(done) {
+        var config = {
+            token: configurationFile.token,
+            maxRetries: 5,
+            host: "splunk.invalid"
+        };
+        var splunkBunyanStream = SplunkBunyan.createStream(config);
+
+        var retryCount = 0;
+
+        // Wrap the _post so we can verify retries
+        var post = splunkBunyanStream.stream.logger._post;
+        splunkBunyanStream.stream.logger._post = function(requestOptions, callback) {
+            retryCount++;
+            post(requestOptions, callback);
+        };
+
+        splunkBunyanStream.stream.on("error", function(err) {
+            assert.ok(err);
+            assert.strictEqual("ENOTFOUND", err.code);
+            assert.strictEqual(config.maxRetries + 1, retryCount);
+            done();
+        });
+
+        var Logger = bunyan.createLogger({
+            name: "a bunyan logger",
+            streams: [
+                splunkBunyanStream
+            ]
+        });
+
+        Logger.info("this is a test statement");
     });
 });
