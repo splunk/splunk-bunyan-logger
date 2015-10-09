@@ -37,11 +37,12 @@ var invalidTokenBody = {
     code: 4
 };
 
-var incorrectIndexBody = {
-    text: "Incorrect index",
-    code: 7,
-    "invalid-event-number": 1
-};
+// TODO: test unsuccessfully sending to another index with specific index token settings
+// var incorrectIndexBody = {
+//     text: "Incorrect index",
+//     code: 7,
+//     "invalid-event-number": 1
+// };
 
 describe("Bunyan", function() {
     it("should create logger with SplunkStream", function() {
@@ -457,32 +458,18 @@ describe("Bunyan", function() {
 
         Logger.info({sourcetype: "different_sourcetype"}, "custom sourcetype");
     });
-    it("should error in sending data with valid token to wrong index", function(done) {
+    it("should succeed in sending data with valid token to any index", function(done) {
         var splunkBunyanStream = SplunkBunyan.createStream(configurationFile);
-
-        var run = false;
 
         // Override the default send function
         splunkBunyanStream.stream.send = function(err, resp, body) {
             assert.ok(!err);
-            assert.ok(run);
             assert.strictEqual(resp.headers["content-type"], "application/json; charset=UTF-8");
             assert.strictEqual(resp.body, body);
-            assert.strictEqual(body.text, incorrectIndexBody.text);
-            assert.strictEqual(body.code, incorrectIndexBody.code);
-            assert.strictEqual(body["invalid-event-number"], incorrectIndexBody["invalid-event-number"]);
+            assert.strictEqual(body.text, successBody.text);
+            assert.strictEqual(body.code, successBody.code);
             done();
         };
-
-        splunkBunyanStream.on("error", function(err, errContext) {
-            run = true;
-            assert.ok(err);
-            assert.strictEqual(err.message, incorrectIndexBody.text);
-            assert.strictEqual(err.code, incorrectIndexBody.code);
-            assert.ok(errContext);
-            assert.strictEqual(errContext.metadata.index, "_____different_index");
-            assert.strictEqual(errContext.message.msg, "custom index");
-        });
 
         var Logger = bunyan.createLogger({
             name: "a bunyan logger",
