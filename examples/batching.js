@@ -41,7 +41,8 @@ var config = {
     protocol: "https",
     port: 8088,
     level: "info",
-    autoFlush: false
+    autoFlush: false,
+    maxRetries: 0
 };
 var splunkStream = splunkBunyan.createStream(config);
 
