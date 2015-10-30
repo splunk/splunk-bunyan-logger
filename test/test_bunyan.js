@@ -556,7 +556,7 @@ describe("Bunyan", function() {
         Logger.info("this is a test statement");
         Logger.info("this is a test statement");
     });
-    it("should succeed in sending data twice with valid token with autoFlush off", function(done) {
+    it("should succeed in sending data twice with valid token with autoFlush off flush(err, resp, body)", function(done) {
         var config = {
             token: configurationFile.token,
             autoFlush: false
@@ -565,10 +565,11 @@ describe("Bunyan", function() {
 
         var run = false;
 
-        // Wrap the default send function
+        // Wrap the default send function, it should never be executed
         var send = splunkBunyanStream.stream.send;
         splunkBunyanStream.stream.send = function(err, resp, body) {
             run = true;
+            assert.ok(false);
             send(err, resp, body);
         };
 
@@ -587,13 +588,47 @@ describe("Bunyan", function() {
 
         splunkBunyanStream.flush(function(err, resp, body) {
             assert.ok(!err);
-            assert.ok(run);
+            assert.ok(!run); // Shouldn't execute the stream.send() above
             assert.strictEqual(resp.headers["content-type"], "application/json; charset=UTF-8");
             assert.strictEqual(resp.body, body);
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
             done();
         });
+    });
+    it("should succeed in sending data twice with valid token with autoFlush off, flush()", function(done) {
+        var config = {
+            token: configurationFile.token,
+            autoFlush: false
+        };
+        var splunkBunyanStream = SplunkBunyan.createStream(config);
+
+        // Wrap the default send function
+        var send = splunkBunyanStream.stream.send;
+        splunkBunyanStream.stream.send = function(err, resp, body) {
+            assert.strictEqual(resp.headers["content-type"], "application/json; charset=UTF-8");
+            assert.strictEqual(resp.body, body);
+            assert.strictEqual(body.text, successBody.text);
+            assert.strictEqual(body.code, successBody.code);
+            send(err, resp, body);
+            done();
+        };
+
+        var Logger = bunyan.createLogger({
+            name: "a bunyan logger",
+            streams: [
+                splunkBunyanStream
+            ]
+        });
+
+        assert.strictEqual(splunkBunyanStream.stream.logger.contextQueue.length, 0);
+        Logger.info("this is a test statement");
+        assert.strictEqual(splunkBunyanStream.stream.logger.contextQueue.length, 1);
+        Logger.info("this is a test statement");
+        assert.strictEqual(splunkBunyanStream.stream.logger.contextQueue.length, 2);
+
+        // Call flush without a callback, falls back to stream.send() above
+        splunkBunyanStream.flush();
     });
     it("should get context when middleware calls next(error)", function(done) {
         var splunkBunyanStream = SplunkBunyan.createStream(configurationFile);

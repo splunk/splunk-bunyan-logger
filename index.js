@@ -17,7 +17,8 @@
 var Stream = require("stream").Writable;
 var util = require("util");
 
-var SplunkLogger = require("splunk-logging").Logger;
+var SplunkLogging = require("splunk-logging");
+var SplunkLogger = SplunkLogging.Logger;
 
 /**
  * A class that implements a raw writable stream.
@@ -219,6 +220,8 @@ module.exports =  {
                 this.stream.on(event, callback);
             },
             flush: function(callback) {
+                // If flush is called with no param, use the send() callback
+                callback = callback || this.stream.send;
                 this.stream.logger.flush(callback);
             },
             stream: stream
