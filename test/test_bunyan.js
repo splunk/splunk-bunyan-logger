@@ -723,4 +723,271 @@ describe("Bunyan", function() {
 
         Logger.info("this is a test statement");
     });
+    it("should be noop when nothing to flush", function(done) {
+        var config = {
+            token: configurationFile.token,
+            autoFlush: true,
+            batchInterval: 100
+        };
+        var splunkBunyanStream = SplunkBunyan.createStream(config);
+
+        var postCount = 0;
+
+        // Wrap the _post so we can verify retries
+        var post = splunkBunyanStream.stream.logger._post;
+        splunkBunyanStream.stream.logger._post = function(requestOptions, callback) {
+            postCount++;
+            post(requestOptions, callback);
+        };
+
+        var flushCount = 0;
+        var nothingResponses = 0;
+
+        // Wrap flush so we can verify flushing is attempted
+        var flush = splunkBunyanStream.stream.logger.flush;
+        splunkBunyanStream.stream.logger.flush = function() {
+            flushCount++;
+            flush(function(err, resp, body) {
+                if (body.text === "Nothing to flush.") {
+                    nothingResponses++;
+                }
+            });
+        };
+
+        var Logger = bunyan.createLogger({
+            name: "a bunyan logger",
+            streams: [
+                splunkBunyanStream
+            ]
+        });
+
+        Logger.info();
+        Logger.info();
+        Logger.info();
+        Logger.info();
+        Logger.info();
+
+        setTimeout(function() {
+            assert.strictEqual(0, postCount);
+            assert.strictEqual(3, flushCount);
+            assert.strictEqual(3, nothingResponses);
+            done();
+        }, 350);
+    });
+    it("should post once for 1 event", function(done) {
+        var config = {
+            token: configurationFile.token,
+            autoFlush: true,
+            batchInterval: 100
+        };
+        var splunkBunyanStream = SplunkBunyan.createStream(config);
+
+        var postCount = 0;
+
+        // Wrap the _post so we can verify retries
+        var post = splunkBunyanStream.stream.logger._post;
+        splunkBunyanStream.stream.logger._post = function(requestOptions, callback) {
+            postCount++;
+            post(requestOptions, callback);
+        };
+
+        var flushCount = 0;
+        var nothingResponses = 0;
+
+        // Wrap flush so we can verify flushing is attempted
+        var flush = splunkBunyanStream.stream.logger.flush;
+        splunkBunyanStream.stream.logger.flush = function() {
+            flushCount++;
+            flush(function(err, resp, body) {
+                if (body.text === "Nothing to flush.") {
+                    nothingResponses++;
+                }
+            });
+        };
+
+        var Logger = bunyan.createLogger({
+            name: "a bunyan logger",
+            streams: [
+                splunkBunyanStream
+            ]
+        });
+
+        Logger.info("valid event");
+        Logger.info();
+        Logger.info();
+        Logger.info();
+        Logger.info();
+
+        setTimeout(function() {
+            assert.strictEqual(1, postCount);
+            assert.strictEqual(3, flushCount);
+            assert.strictEqual(2, nothingResponses);
+            done();
+        }, 350);
+    });
+    it("should post once for 2 events", function(done) {
+        var config = {
+            token: configurationFile.token,
+            autoFlush: true,
+            batchInterval: 100
+        };
+        var splunkBunyanStream = SplunkBunyan.createStream(config);
+
+        var postCount = 0;
+
+        // Wrap the _post so we can verify retries
+        var post = splunkBunyanStream.stream.logger._post;
+        splunkBunyanStream.stream.logger._post = function(requestOptions, callback) {
+            postCount++;
+            post(requestOptions, callback);
+        };
+
+        var flushCount = 0;
+        var nothingResponses = 0;
+
+        // Wrap flush so we can verify flushing is attempted
+        var flush = splunkBunyanStream.stream.logger.flush;
+        splunkBunyanStream.stream.logger.flush = function() {
+            flushCount++;
+            flush(function(err, resp, body) {
+                if (body.text === "Nothing to flush.") {
+                    nothingResponses++;
+                }
+            });
+        };
+
+        var Logger = bunyan.createLogger({
+            name: "a bunyan logger",
+            streams: [
+                splunkBunyanStream
+            ]
+        });
+
+        Logger.info("valid event");
+        setTimeout(function(){
+            Logger.info("valid event");
+        }, 80);
+        Logger.info();
+        Logger.info();
+        Logger.info();
+
+        setTimeout(function() {
+            assert.strictEqual(1, postCount);
+            assert.strictEqual(3, flushCount);
+            assert.strictEqual(2, nothingResponses);
+            done();
+        }, 350);
+    });
+    it("should post once for 5 events", function(done) {
+        var config = {
+            token: configurationFile.token,
+            autoFlush: true,
+            batchInterval: 100
+        };
+        var splunkBunyanStream = SplunkBunyan.createStream(config);
+
+        var postCount = 0;
+
+        // Wrap the _post so we can verify retries
+        var post = splunkBunyanStream.stream.logger._post;
+        splunkBunyanStream.stream.logger._post = function(requestOptions, callback) {
+            postCount++;
+            post(requestOptions, callback);
+        };
+
+        var flushCount = 0;
+        var nothingResponses = 0;
+
+        // Wrap flush so we can verify flushing is attempted
+        var flush = splunkBunyanStream.stream.logger.flush;
+        splunkBunyanStream.stream.logger.flush = function() {
+            flushCount++;
+            flush(function(err, resp, body) {
+                if (body.text === "Nothing to flush.") {
+                    nothingResponses++;
+                }
+            });
+        };
+
+        var Logger = bunyan.createLogger({
+            name: "a bunyan logger",
+            streams: [
+                splunkBunyanStream
+            ]
+        });
+
+        Logger.info("valid event");
+        Logger.info("valid event");
+        Logger.info("valid event");
+
+        setTimeout(function(){
+            Logger.info("valid event");
+            Logger.info("valid event");
+        }, 80);
+
+        Logger.info();
+
+        setTimeout(function() {
+            assert.strictEqual(1, postCount);
+            assert.strictEqual(3, flushCount);
+            assert.strictEqual(2, nothingResponses);
+            done();
+        }, 350);
+    });
+    it("should flush a stale event after enabling autoFlush & setting batchInterval", function(done) {
+        var config = {
+            token: configurationFile.token,
+            autoFlush: false
+        };
+        var splunkBunyanStream = SplunkBunyan.createStream(config);
+
+        var postCount = 0;
+
+        // Wrap the _post so we can verify retries
+        var post = splunkBunyanStream.stream.logger._post;
+        splunkBunyanStream.stream.logger._post = function(requestOptions, callback) {
+            postCount++;
+            post(requestOptions, callback);
+        };
+
+        var flushCount = 0;
+        var nothingResponses = 0;
+
+        // Wrap flush so we can verify flushing is attempted
+        var flush = splunkBunyanStream.stream.logger.flush;
+        splunkBunyanStream.stream.logger.flush = function() {
+            flushCount++;
+            flush(function(err, resp, body) {
+                if (body.text === "Nothing to flush.") {
+                    nothingResponses++;
+                }
+            });
+        };
+
+        var Logger = bunyan.createLogger({
+            name: "a bunyan logger",
+            streams: [
+                splunkBunyanStream
+            ]
+        });
+
+        Logger.info("valid event");
+        assert.strictEqual(0, postCount);
+        assert.strictEqual(0, flushCount);
+        assert.strictEqual(0, nothingResponses);
+
+        splunkBunyanStream.stream.logger.config = splunkBunyanStream.stream.logger._initializeConfig({
+            batchInterval: 100,
+            autoFlush: true
+        });
+
+        setTimeout(function() {
+            console.log(splunkBunyanStream.stream.logger);
+            console.log(postCount, flushCount, nothingResponses);
+            assert.strictEqual(1, postCount);
+            assert.strictEqual(3, flushCount);
+            assert.strictEqual(2, nothingResponses);
+            done();
+        }, 350);
+    });
 });

@@ -43,6 +43,7 @@ var SplunkLogger = SplunkLogging.Logger;
  * @param {string} [config.level=info] - Logging level to use, will show up as the <code>severity</code> field of an event, see
  *  [SplunkLogger.levels]{@link SplunkLogger#levels} for common levels.
  * @param {bool} [config.autoFlush=true] - Send events immediately or not.
+ * @param {number} [config.batchInterval=0] - If <code>config.autoFlush === true</code>, automatically flush events after this many milliseconds.
  * @constructor
  * @implements {@link https://nodejs.org/api/stream.html#stream_class_stream_writable|Stream.Writable}
  */
