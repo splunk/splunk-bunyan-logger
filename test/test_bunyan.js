@@ -138,7 +138,10 @@ describe("Bunyan", function() {
             assert.strictEqual(err.message, invalidTokenBody.text);
             assert.strictEqual(err.code, invalidTokenBody.code);
             assert.ok(context);
-            assert.strictEqual(context.message.msg, "this is a test statement");
+
+            var body = context.message.event;
+            assert.strictEqual(body.message.msg, "this is a test statement");
+            assert.strictEqual(body.severity, "info");
         });
 
         var Logger = bunyan.createLogger({
@@ -741,16 +744,14 @@ describe("Bunyan", function() {
         };
 
         var flushCount = 0;
-        var nothingResponses = 0;
+        var responses = 0;
 
         // Wrap flush so we can verify flushing is attempted
         var flush = splunkBunyanStream.stream.logger.flush;
         splunkBunyanStream.stream.logger.flush = function() {
             flushCount++;
-            flush(function(err, resp, body) {
-                if (body.text === "Nothing to flush.") {
-                    nothingResponses++;
-                }
+            flush(function() {
+                responses++;
             });
         };
 
@@ -769,8 +770,8 @@ describe("Bunyan", function() {
 
         setTimeout(function() {
             assert.strictEqual(0, postCount);
-            assert.strictEqual(3, flushCount);
-            assert.strictEqual(3, nothingResponses);
+            assert.strictEqual(0, flushCount);
+            assert.strictEqual(0, responses);
             done();
         }, 350);
     });
@@ -792,16 +793,17 @@ describe("Bunyan", function() {
         };
 
         var flushCount = 0;
-        var nothingResponses = 0;
+        var responses = 0;
 
         // Wrap flush so we can verify flushing is attempted
         var flush = splunkBunyanStream.stream.logger.flush;
         splunkBunyanStream.stream.logger.flush = function() {
             flushCount++;
             flush(function(err, resp, body) {
-                if (body.text === "Nothing to flush.") {
-                    nothingResponses++;
-                }
+                responses++;
+                assert.ok(!err);
+                assert.strictEqual(body.code, successBody.code);
+                assert.strictEqual(body.text, successBody.text);
             });
         };
 
@@ -820,8 +822,8 @@ describe("Bunyan", function() {
 
         setTimeout(function() {
             assert.strictEqual(1, postCount);
-            assert.strictEqual(3, flushCount);
-            assert.strictEqual(2, nothingResponses);
+            assert.strictEqual(1, flushCount);
+            assert.strictEqual(1, responses);
             done();
         }, 350);
     });
@@ -843,16 +845,17 @@ describe("Bunyan", function() {
         };
 
         var flushCount = 0;
-        var nothingResponses = 0;
+        var responses = 0;
 
         // Wrap flush so we can verify flushing is attempted
         var flush = splunkBunyanStream.stream.logger.flush;
         splunkBunyanStream.stream.logger.flush = function() {
             flushCount++;
             flush(function(err, resp, body) {
-                if (body.text === "Nothing to flush.") {
-                    nothingResponses++;
-                }
+                responses++;
+                assert.ok(!err);
+                assert.strictEqual(body.code, successBody.code);
+                assert.strictEqual(body.text, successBody.text);
             });
         };
 
@@ -873,8 +876,8 @@ describe("Bunyan", function() {
 
         setTimeout(function() {
             assert.strictEqual(1, postCount);
-            assert.strictEqual(3, flushCount);
-            assert.strictEqual(2, nothingResponses);
+            assert.strictEqual(1, flushCount);
+            assert.strictEqual(1, responses);
             done();
         }, 350);
     });
@@ -896,16 +899,17 @@ describe("Bunyan", function() {
         };
 
         var flushCount = 0;
-        var nothingResponses = 0;
+        var responses = 0;
 
         // Wrap flush so we can verify flushing is attempted
         var flush = splunkBunyanStream.stream.logger.flush;
         splunkBunyanStream.stream.logger.flush = function() {
             flushCount++;
             flush(function(err, resp, body) {
-                if (body.text === "Nothing to flush.") {
-                    nothingResponses++;
-                }
+                responses++;
+                assert.ok(!err);
+                assert.strictEqual(body.code, successBody.code);
+                assert.strictEqual(body.text, successBody.text);
             });
         };
 
@@ -929,8 +933,8 @@ describe("Bunyan", function() {
 
         setTimeout(function() {
             assert.strictEqual(1, postCount);
-            assert.strictEqual(3, flushCount);
-            assert.strictEqual(2, nothingResponses);
+            assert.strictEqual(1, flushCount);
+            assert.strictEqual(1, responses);
             done();
         }, 350);
     });
@@ -951,16 +955,17 @@ describe("Bunyan", function() {
         };
 
         var flushCount = 0;
-        var nothingResponses = 0;
+        var responses = 0;
 
         // Wrap flush so we can verify flushing is attempted
         var flush = splunkBunyanStream.stream.logger.flush;
         splunkBunyanStream.stream.logger.flush = function() {
             flushCount++;
             flush(function(err, resp, body) {
-                if (body.text === "Nothing to flush.") {
-                    nothingResponses++;
-                }
+                responses++;
+                assert.ok(!err);
+                assert.strictEqual(body.code, successBody.code);
+                assert.strictEqual(body.text, successBody.text);
             });
         };
 
@@ -974,7 +979,7 @@ describe("Bunyan", function() {
         Logger.info("valid event");
         assert.strictEqual(0, postCount);
         assert.strictEqual(0, flushCount);
-        assert.strictEqual(0, nothingResponses);
+        assert.strictEqual(0, responses);
 
         splunkBunyanStream.stream.logger.config = splunkBunyanStream.stream.logger._initializeConfig({
             batchInterval: 100,
@@ -982,11 +987,9 @@ describe("Bunyan", function() {
         });
 
         setTimeout(function() {
-            console.log(splunkBunyanStream.stream.logger);
-            console.log(postCount, flushCount, nothingResponses);
             assert.strictEqual(1, postCount);
-            assert.strictEqual(3, flushCount);
-            assert.strictEqual(2, nothingResponses);
+            assert.strictEqual(1, flushCount);
+            assert.strictEqual(1, responses);
             done();
         }, 350);
     });

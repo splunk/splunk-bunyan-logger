@@ -119,7 +119,9 @@ describe("SplunkStream", function() {
             assert.strictEqual(err.message, invalidTokenBody.text);
             assert.strictEqual(err.code, invalidTokenBody.code);
             assert.ok(errContext);
-            assert.strictEqual(errContext.message.msg, "something");
+            var body = errContext.message.event;
+            assert.strictEqual(body.message.msg, "something");
+            assert.strictEqual(body.severity, "info");
         });
 
         var sendCallback = splunkBunyanStream.stream.send;
