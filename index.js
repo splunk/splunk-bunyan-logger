@@ -44,6 +44,8 @@ var SplunkLogger = SplunkLogging.Logger;
  *  [SplunkLogger.levels]{@link SplunkLogger#levels} for common levels.
  * @param {bool} [config.autoFlush=true] - Send events immediately or not.
  * @param {number} [config.batchInterval=0] - If <code>config.autoFlush === true</code>, automatically flush events after this many milliseconds.
+ * @param {number} [config.maxBatchSize=0] - If <code>config.autoFlush === true</code>, automatically flush events after the size of queued
+ * events exceeds this many bytes.
  * @constructor
  * @implements {@link https://nodejs.org/api/stream.html#stream_class_stream_writable|Stream.Writable}
  */

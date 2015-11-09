@@ -993,4 +993,233 @@ describe("Bunyan", function() {
             done();
         }, 350);
     });
+    it("should flush first event immediately with maxBatchSize=1", function(done) {
+        var config = {
+            token: configurationFile.token,
+            maxBatchSize: 1
+        };
+        var splunkBunyanStream = SplunkBunyan.createStream(config);
+
+        var postCount = 0;
+
+        // Wrap the _post so we can verify retries
+        var post = splunkBunyanStream.stream.logger._post;
+        splunkBunyanStream.stream.logger._post = function(requestOptions, callback) {
+            postCount++;
+            post(requestOptions, callback);
+        };
+
+        var flushCount = 0;
+        var responses = 0;
+
+        // Wrap flush so we can verify flushing is attempted
+        var flush = splunkBunyanStream.stream.logger.flush;
+        splunkBunyanStream.stream.logger.flush = function() {
+            flushCount++;
+            flush(function(err, resp, body) {
+                responses++;
+                assert.ok(!err);
+                assert.strictEqual(body.code, successBody.code);
+                assert.strictEqual(body.text, successBody.text);
+            });
+        };
+
+        var Logger = bunyan.createLogger({
+            name: "a bunyan logger",
+            streams: [
+                splunkBunyanStream
+            ]
+        });
+
+        Logger.info("more than 1 byte");
+
+        setTimeout(function() {
+            assert.ok(!splunkBunyanStream.stream.logger._timerID);
+            assert.strictEqual(splunkBunyanStream.stream.logger.contextQueue.length, 0);
+            assert.strictEqual(splunkBunyanStream.stream.logger.eventSizes.length, 0);
+            assert.strictEqual(postCount, 1);
+            assert.strictEqual(flushCount, 1);
+            assert.strictEqual(responses, 1);
+            done();
+        }, 100);
+    });
+    it("should not flush first event with maxBatchSize=1 && autoFlush=false", function(done) {
+        var config = {
+            token: configurationFile.token,
+            maxBatchSize: 1,
+            autoFlush: false
+        };
+        var splunkBunyanStream = SplunkBunyan.createStream(config);
+
+        var postCount = 0;
+
+        // Wrap the _post so we can verify retries
+        var post = splunkBunyanStream.stream.logger._post;
+        splunkBunyanStream.stream.logger._post = function(requestOptions, callback) {
+            postCount++;
+            post(requestOptions, callback);
+        };
+
+        var flushCount = 0;
+        var responses = 0;
+
+        // Wrap flush so we can verify flushing is attempted
+        var flush = splunkBunyanStream.stream.logger.flush;
+        splunkBunyanStream.stream.logger.flush = function() {
+            flushCount++;
+            flush(function(err, resp, body) {
+                responses++;
+                assert.ok(!err);
+                assert.strictEqual(body.code, successBody.code);
+                assert.strictEqual(body.text, successBody.text);
+            });
+        };
+
+        var Logger = bunyan.createLogger({
+            name: "a bunyan logger",
+            streams: [
+                splunkBunyanStream
+            ]
+        });
+
+        Logger.info("more than 1 byte");
+
+        setTimeout(function() {
+            assert.ok(!splunkBunyanStream.stream.logger._timerID);
+            assert.strictEqual(splunkBunyanStream.stream.logger.contextQueue.length, 1);
+            assert.strictEqual(splunkBunyanStream.stream.logger.eventSizes.length, 1);
+            assert.strictEqual(postCount, 0);
+            assert.strictEqual(flushCount, 0);
+            assert.strictEqual(responses, 0);
+            done();
+        }, 1000);
+    });
+    it("should flush first 2 events after maxBatchSize>200", function(done) {
+        var config = {
+            token: configurationFile.token,
+            maxBatchSize: 200
+        };
+        var splunkBunyanStream = SplunkBunyan.createStream(config);
+
+        var postCount = 0;
+
+        // Wrap the _post so we can verify retries
+        var post = splunkBunyanStream.stream.logger._post;
+        splunkBunyanStream.stream.logger._post = function(requestOptions, callback) {
+            postCount++;
+            post(requestOptions, callback);
+        };
+
+        var flushCount = 0;
+        var responses = 0;
+
+        // Wrap flush so we can verify flushing is attempted
+        var flush = splunkBunyanStream.stream.logger.flush;
+        splunkBunyanStream.stream.logger.flush = function() {
+            flushCount++;
+            flush(function(err, resp, body) {
+                responses++;
+                assert.ok(!err);
+                assert.strictEqual(body.code, successBody.code);
+                assert.strictEqual(body.text, successBody.text);
+            });
+        };
+
+        var Logger = bunyan.createLogger({
+            name: "a bunyan logger",
+            streams: [
+                splunkBunyanStream
+            ]
+        });
+
+        Logger.info("more than 1 byte");
+
+        setTimeout(function() {
+            assert.ok(!splunkBunyanStream.stream.logger._timerID);
+            assert.strictEqual(splunkBunyanStream.stream.logger.contextQueue.length, 1);
+            assert.strictEqual(splunkBunyanStream.stream.logger.eventSizes.length, 1);
+
+            assert.strictEqual(postCount, 0);
+            assert.strictEqual(flushCount, 0);
+            assert.strictEqual(responses, 0);
+
+            Logger.info("more than 1 byte");
+        }, 300);
+
+        setTimeout(function() {
+            assert.ok(!splunkBunyanStream.stream.logger._timerID);
+            assert.strictEqual(splunkBunyanStream.stream.logger.contextQueue.length, 0);
+            assert.strictEqual(splunkBunyanStream.stream.logger.eventSizes.length, 0);
+            assert.strictEqual(postCount, 1);
+            assert.strictEqual(flushCount, 1);
+            assert.strictEqual(responses, 1);
+            done();
+        }, 400);
+    });
+    it("should flush first event after 200ms, with maxBatchSize=200", function(done) {
+        var config = {
+            token: configurationFile.token,
+            maxBatchSize: 200,
+            batchInterval: 200
+        };
+        var splunkBunyanStream = SplunkBunyan.createStream(config);
+
+        var postCount = 0;
+
+        // Wrap the _post so we can verify retries
+        var post = splunkBunyanStream.stream.logger._post;
+        splunkBunyanStream.stream.logger._post = function(requestOptions, callback) {
+            postCount++;
+            post(requestOptions, callback);
+        };
+
+        var flushCount = 0;
+        var responses = 0;
+
+        // Wrap flush so we can verify flushing is attempted
+        var flush = splunkBunyanStream.stream.logger.flush;
+        splunkBunyanStream.stream.logger.flush = function() {
+            flushCount++;
+            flush(function(err, resp, body) {
+                responses++;
+                assert.ok(!err);
+                assert.strictEqual(body.code, successBody.code);
+                assert.strictEqual(body.text, successBody.text);
+            });
+        };
+
+        var Logger = bunyan.createLogger({
+            name: "a bunyan logger",
+            streams: [
+                splunkBunyanStream
+            ]
+        });
+
+        Logger.info("more than 1 byte");
+
+        setTimeout(function() {
+            assert.ok(splunkBunyanStream.stream.logger._timerID);
+            assert.strictEqual(splunkBunyanStream.stream.logger._timerDuration, 200);
+            assert.strictEqual(splunkBunyanStream.stream.logger.contextQueue.length, 1);
+            assert.strictEqual(splunkBunyanStream.stream.logger.eventSizes.length, 1);
+
+            assert.strictEqual(postCount, 0);
+            assert.strictEqual(flushCount, 0);
+            assert.strictEqual(responses, 0);
+
+            Logger.info("more than 1 byte");
+        }, 150);
+
+        setTimeout(function() {
+            assert.ok(splunkBunyanStream.stream.logger._timerID);
+            assert.strictEqual(splunkBunyanStream.stream.logger._timerDuration, 200);
+            assert.strictEqual(splunkBunyanStream.stream.logger.contextQueue.length, 0);
+            assert.strictEqual(splunkBunyanStream.stream.logger.eventSizes.length, 0);
+            
+            assert.strictEqual(postCount, 1);
+            assert.strictEqual(flushCount, 1);
+            assert.strictEqual(responses, 1);
+            done();
+        }, 250);
+    });
 });
