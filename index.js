@@ -202,8 +202,6 @@ module.exports =  {
          * @typedef SplunkBunyanStream
          * @property {string} level The logging level for Bunyan.
          * @property {string} type Always <code>raw</code>
-         * @property {function} use Takes a middleware function parameter: <code>function(context, next)</code>,
-         * this function must call <code>next(error, context)</code>.
          * Adds an express-like middleware function to run before sending the
          * data to Splunk. Multiple middleware functions can be used, they will be executed
          * in the order they are added.
@@ -218,9 +216,6 @@ module.exports =  {
         return {
             level: config.level || module.exports.levels.INFO,
             type: "raw",
-            use: function(middleware) {
-                this.stream.logger.use(middleware);
-            },
             on: function(event, callback) {
                 this.stream.on(event, callback);
             },
