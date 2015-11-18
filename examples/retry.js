@@ -34,7 +34,6 @@ var bunyan = require("bunyan");
 var config = {
     token: "your-token-here",
     url: "https://localhost:8088",
-    level: "info",
     maxRetries: 5
 };
 var splunkStream = splunkBunyan.createStream(config);
@@ -62,7 +61,7 @@ var payload = {
     source: "chicken coop",
     sourcetype: "httpevent",
     index: "main",
-    host: "farm.local",
+    host: "farm.local"
 };
 
 // Send the payload

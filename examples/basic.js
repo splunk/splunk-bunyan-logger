@@ -25,21 +25,10 @@ var bunyan = require("bunyan");
 
 /**
  * Only the token property is required.
- * Defaults are listed explicitly.
- *
- * Alternatively, specify config.url like so:
- *
- * "https://localhost:8088/services/collector/event/1.0"
  */
 var config = {
     token: "your-token-here",
-    host: "localhost",
-    path: "/services/collector/event/1.0",
-    protocol: "https",
-    port: 8088,
-    level: "info",
-    autoFlush: true,
-    maxRetries: 0
+    url: "https://localhost:8088"
 };
 var splunkStream = splunkBunyan.createStream(config);
 
@@ -66,9 +55,37 @@ var payload = {
     source: "chicken coop",
     sourcetype: "httpevent",
     index: "main",
-    host: "farm.local",
+    host: "farm.local"
 };
 
-// Send the payload
+/**
+ * Since maxBatchCount is set to 1 by default, calling send
+ * will immediately send the payload.
+ * 
+ * The underlying HTTP POST request is made to
+ *
+ *     https://localhost:8088/services/collector/event/1.0
+ *
+ * with the following body
+ *
+ *     {
+ *         "source": "chicken coop",
+ *         "sourcetype": "httpevent",
+ *         "index": "main",
+ *         "host": "farm.local",
+ *         "event": {
+ *             "message": {
+ *                 "chickenCount": 500
+ *                 "msg": "Chicken coup looks stable.",
+ *                 "name": "my logger",
+ *                 "put": 98884,
+ *                 "temperature": "70F",
+ *                 "v": 0
+ *             },
+ *             "severity": "info"
+ *         }
+ *     }
+ *
+ */
 console.log("Sending payload", payload);
 Logger.info(payload, "Chicken coup looks stable.");
