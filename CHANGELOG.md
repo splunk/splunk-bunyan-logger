@@ -1,6 +1,6 @@
-# Splunk HTTP Event Collector Stream for Bunyan (beta)
+# Splunk HTTP Event Collector Stream for Bunyan
 
-## v0.9.0 - beta
+## v0.9.0
 
 ### New Features & APIs
 
