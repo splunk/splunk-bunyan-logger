@@ -56,7 +56,7 @@ var SplunkStream = function (config) {
 
     // If using the common logger's default name, change it
     if (this.logger.config.name.match("splunk-javascript-logging/\\d\\.\\d\\.\\d")) {
-        this.logger.config.name = "splunk-bunyan-logger/0.8.0";
+        this.logger.config.name = "splunk-bunyan-logger/0.9.0";
     }
 
     // Overwrite the common library's error callback

@@ -1,6 +1,6 @@
 # Splunk HTTP Event Collector Stream for Bunyan (beta)
 
-#### Version 0.8.0
+#### Version 0.9.0
 
 This project provides a stream for Splunk's HTTP Event Collector to be used with [Bunyan](https://www.npmjs.com/package/bunyan).
 
@@ -19,9 +19,10 @@ If you already have Node.js and npm installed, simply run: `npm install --save s
 
 See the `examples` folder for more examples:
 
+* `all_batching.js`: shows how to configure a Bunyan Stream with the 3 batching settings: `batchInterval`, `maxBatchCount`, & `maxBatchSize`.
 * `basic.js`: shows how to configure a Bunyan stream and send a log message to Splunk.
-* `batching.js`: shows how to queue log messages, and send them in batches.
-* `middleware.js`: shows how to add an express-like middleware function to be called before sending log messages to Splunk.
+* `custom_format.js`: shows how to configure a Bunyan Stream to log messages to Splunk using a custom format.
+* `manual_batching.js`: shows how to queue log messages, and send them in batches by manually calling `flush()`.
 * `retry.js`: shows how to configure retries on errors.
 
 ### Basic example

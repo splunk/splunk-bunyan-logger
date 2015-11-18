@@ -54,7 +54,7 @@ describe("createStream", function() {
         assert.ok(splunkBunyanStream.stream.logger.hasOwnProperty("config"));
         assert.ok(splunkBunyanStream.stream.hasOwnProperty("send"));
         assert.strictEqual(config.token, splunkBunyanStream.stream.config().token);
-        assert.strictEqual("splunk-bunyan-logger/0.8.0", splunkBunyanStream.stream.config().name);
+        assert.strictEqual("splunk-bunyan-logger/0.9.0", splunkBunyanStream.stream.config().name);
         assert.strictEqual("localhost", splunkBunyanStream.stream.config().host);
         assert.strictEqual("/services/collector/event/1.0", splunkBunyanStream.stream.config().path);
         assert.strictEqual("https", splunkBunyanStream.stream.config().protocol);
@@ -78,7 +78,7 @@ describe("createStream", function() {
         assert.ok(splunkBunyanStream.stream.logger.hasOwnProperty("config"));
         assert.ok(splunkBunyanStream.stream.hasOwnProperty("send"));
         assert.strictEqual(config.token, splunkBunyanStream.stream.config().token);
-        assert.strictEqual("splunk-bunyan-logger/0.8.0", splunkBunyanStream.stream.config().name);
+        assert.strictEqual("splunk-bunyan-logger/0.9.0", splunkBunyanStream.stream.config().name);
         assert.strictEqual("localhost", splunkBunyanStream.stream.config().host);
         assert.strictEqual("/services/collector/event/1.0", splunkBunyanStream.stream.config().path);
         assert.strictEqual("https", splunkBunyanStream.stream.config().protocol);
@@ -126,7 +126,7 @@ describe("createStream", function() {
         assert.ok(splunkBunyanStream.stream.logger.hasOwnProperty("config"));
         assert.ok(splunkBunyanStream.stream.hasOwnProperty("send"));
         assert.strictEqual(config.token, splunkBunyanStream.stream.config().token);
-        assert.strictEqual("splunk-bunyan-logger/0.8.0", splunkBunyanStream.stream.config().name);
+        assert.strictEqual("splunk-bunyan-logger/0.9.0", splunkBunyanStream.stream.config().name);
         assert.strictEqual("localhost", splunkBunyanStream.stream.config().host);
         assert.strictEqual(config.path, splunkBunyanStream.stream.config().path);
         assert.strictEqual("https", splunkBunyanStream.stream.config().protocol);
@@ -149,7 +149,7 @@ describe("createStream", function() {
         assert.ok(splunkBunyanStream.stream.logger.hasOwnProperty("config"));
         assert.ok(splunkBunyanStream.stream.hasOwnProperty("send"));
         assert.strictEqual(config.token, splunkBunyanStream.stream.config().token);
-        assert.strictEqual("splunk-bunyan-logger/0.8.0", splunkBunyanStream.stream.config().name);
+        assert.strictEqual("splunk-bunyan-logger/0.9.0", splunkBunyanStream.stream.config().name);
         assert.strictEqual("localhost", splunkBunyanStream.stream.config().host);
         assert.strictEqual("/services/collector/event/1.0", splunkBunyanStream.stream.config().path);
         assert.strictEqual("https", splunkBunyanStream.stream.config().protocol);
@@ -172,7 +172,7 @@ describe("createStream", function() {
         assert.ok(splunkBunyanStream.stream.logger.hasOwnProperty("config"));
         assert.ok(splunkBunyanStream.stream.hasOwnProperty("send"));
         assert.strictEqual(config.token, splunkBunyanStream.stream.config().token);
-        assert.strictEqual("splunk-bunyan-logger/0.8.0", splunkBunyanStream.stream.config().name);
+        assert.strictEqual("splunk-bunyan-logger/0.9.0", splunkBunyanStream.stream.config().name);
         assert.strictEqual("localhost", splunkBunyanStream.stream.config().host);
         assert.strictEqual("/services/collector/event/1.0", splunkBunyanStream.stream.config().path);
         assert.strictEqual("https", splunkBunyanStream.stream.config().protocol);
@@ -196,7 +196,7 @@ describe("createStream", function() {
         assert.ok(splunkBunyanStream.stream.logger.hasOwnProperty("config"));
         assert.ok(splunkBunyanStream.stream.hasOwnProperty("send"));
         assert.strictEqual(config.token, splunkBunyanStream.stream.config().token);
-        assert.strictEqual("splunk-bunyan-logger/0.8.0", splunkBunyanStream.stream.config().name);
+        assert.strictEqual("splunk-bunyan-logger/0.9.0", splunkBunyanStream.stream.config().name);
         assert.strictEqual("localhost", splunkBunyanStream.stream.config().host);
         assert.strictEqual("/services/collector/event/1.0", splunkBunyanStream.stream.config().path);
         assert.strictEqual("https", splunkBunyanStream.stream.config().protocol);
