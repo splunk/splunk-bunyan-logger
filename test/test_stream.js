@@ -38,6 +38,14 @@ var invalidTokenBody = {
     code: 4
 };
 
+var ____consoleLog = console.log;
+function mute() {
+    console.log = function(){};
+}
+function unmute() {
+    console.log = ____consoleLog;
+}
+
 function formatForBunyan(data) {
     var ret = {
         name: "a bunyan logger",
@@ -78,8 +86,9 @@ describe("SplunkStream", function() {
         assert.strictEqual("https", splunkBunyanStream.stream.config().protocol);
         assert.strictEqual("info", splunkBunyanStream.stream.config().level);
         assert.strictEqual(8088, splunkBunyanStream.stream.config().port);
-        assert.strictEqual(true, splunkBunyanStream.stream.config().autoFlush);
         assert.strictEqual(0, splunkBunyanStream.stream.config().maxRetries);
+        assert.strictEqual(1, splunkBunyanStream.stream.config().maxBatchCount);
+        assert.strictEqual(0, splunkBunyanStream.stream.config().maxBatchSize);
 
         var sendCallback = splunkBunyanStream.stream.send;
         splunkBunyanStream.stream.send = function(err, resp, body) {
@@ -95,7 +104,8 @@ describe("SplunkStream", function() {
     });
     it("should error when writing a string with bad token", function(done) {
         var config = {
-            token: "bad-token"
+            token: "bad-token",
+            maxBatchCount: 1
         };
 
         var splunkBunyanStream = splunkBunyan.createStream(config);
@@ -109,7 +119,6 @@ describe("SplunkStream", function() {
         assert.strictEqual("https", splunkBunyanStream.stream.config().protocol);
         assert.strictEqual("info", splunkBunyanStream.stream.config().level);
         assert.strictEqual(8088, splunkBunyanStream.stream.config().port);
-        assert.strictEqual(true, splunkBunyanStream.stream.config().autoFlush);
 
         var run = false;
 
@@ -119,7 +128,8 @@ describe("SplunkStream", function() {
             assert.strictEqual(err.message, invalidTokenBody.text);
             assert.strictEqual(err.code, invalidTokenBody.code);
             assert.ok(errContext);
-            var body = errContext.message.event;
+
+            var body = JSON.parse(errContext.message).event;
             assert.strictEqual(body.message.msg, "something");
             assert.strictEqual(body.severity, "info");
         });
@@ -131,38 +141,19 @@ describe("SplunkStream", function() {
             assert.strictEqual(body.text, invalidTokenBody.text);
             assert.strictEqual(body.code, invalidTokenBody.code);
             sendCallback(err, resp, body);
+            unmute();
             done();
         };
 
         var data = "something";
 
+        mute();
         splunkBunyanStream.stream.write(formatForBunyan(data));
-    });
-    it("should emit error from middleware", function(done) {
-        var config = {
-            token: configurationFile.token
-        };
-        var splunkBunyanStream = splunkBunyan.createStream(config);
-
-        var run = false;
-
-        splunkBunyanStream.use(function(context, next) {
-            run = true;
-            next(new Error("this is an error!"));
-        });
-
-        splunkBunyanStream.stream.on("error", function(err) {
-            assert.ok(run);
-            assert.ok(err);
-            assert.strictEqual(err.message, "this is an error!");
-            done();
-        });
-
-        splunkBunyanStream.stream.write(formatForBunyan("something"));
     });
     it("should emit error when writing without args", function(done) {
         var config = {
-            token: configurationFile.token
+            token: configurationFile.token,
+            maxBatchCount: 1
         };
         var splunkBunyanStream = splunkBunyan.createStream(config);
 
@@ -176,7 +167,8 @@ describe("SplunkStream", function() {
     it("should not retry on Splunk error", function(done) {
         var config = {
             token: "bad-token",
-            maxRetries: 5
+            maxRetries: 5,
+            maxBatchCount: 1
         };
         var splunkBunyanStream = splunkBunyan.createStream(config);
 
@@ -194,8 +186,11 @@ describe("SplunkStream", function() {
             assert.strictEqual(invalidTokenBody.code, err.code);
             assert.strictEqual(invalidTokenBody.text, err.message);
             assert.strictEqual(1, retryCount);
+            unmute();
             done();
         });
+
+        mute();
         splunkBunyanStream.stream.write("something");
     });
     it("should retry on network error, bad host", function(done) {
@@ -203,7 +198,8 @@ describe("SplunkStream", function() {
         var config = {
             token: configurationFile.token,
             maxRetries: 3,
-            host: "splunk.invalid"
+            host: "splunk.invalid",
+            maxBatchCount: 1
         };
         var splunkBunyanStream = splunkBunyan.createStream(config);
 
@@ -220,8 +216,11 @@ describe("SplunkStream", function() {
             assert.ok(err);
             assert.strictEqual("ENOTFOUND", err.code);
             assert.strictEqual(config.maxRetries + 1, retryCount);
+            unmute();
             done();
         });
+
+        mute();
         splunkBunyanStream.stream.write("something");
     });
     it("should retry on network error, wrong port", function(done) {
@@ -229,7 +228,8 @@ describe("SplunkStream", function() {
         var config = {
             token: configurationFile.token,
             maxRetries: 3,
-            port: 1075
+            port: 1075,
+            maxBatchCount: 1
         };
         var splunkBunyanStream = splunkBunyan.createStream(config);
 
@@ -246,8 +246,12 @@ describe("SplunkStream", function() {
             assert.ok(err);
             assert.strictEqual("ECONNREFUSED", err.code);
             assert.strictEqual(config.maxRetries + 1, retryCount);
+            unmute();
             done();
         });
+
+        mute();
         splunkBunyanStream.stream.write("something");
     });
+    // TODO: add some tests for batching (interval, size, count)
 });
