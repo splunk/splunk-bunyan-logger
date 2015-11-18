@@ -17,21 +17,22 @@
 var Stream = require("stream").Writable;
 var util = require("util");
 
-var SplunkLogger = require("splunk-logging").Logger;
+var SplunkLogging = require("splunk-logging");
+var SplunkLogger = SplunkLogging.Logger;
 
 /**
  * A class that implements a raw writable stream.
  *
  * @property {object} config - Configuration settings for this <code>SplunkStream</code> instance.
- * @property {function[]} middlewares - Middleware functions to run before sending data to Splunk. See {@link SplunkLogger#use}
  * @property {object[]} contextQueue - Queue of <code>context</code> objects to be sent to Splunk.
  * @property {function} error - A callback function for errors: <code>function(err, context)</code>.
  * Defaults to <code>console.log</code> both values;
  *
  * @param {object} config - Configuration settings for a new [SplunkLogger]{@link SplunkLogger}.
  * @param {string} config.token - Splunk HTTP Event Collector token, required.
- * @param {string} [config.name=splunk-javascript-logging/0.8.0] - Name for this logger.
+ * @param {string} [config.name=splunk-javascript-logging/0.9.0] - Name for this logger.
  * @param {string} [config.host=localhost] - Hostname or IP address of Splunk server.
+ * @param {string} [config.maxRetries=0] - How many times to retry when HTTP POST to Splunk fails.
  * @param {string} [config.path=/services/collector/event/1.0] - URL path to send data to on the Splunk server.
  * @param {string} [config.protocol=https] - Protocol used to communicate with the Splunk server, <code>http</code> or <code>https</code>.
  * @param {number} [config.port=8088] - HTTP Event Collector port on the Splunk server.
@@ -40,7 +41,12 @@ var SplunkLogger = require("splunk-logging").Logger;
  * the corresponding property is set on <code>config</code>.
  * @param {string} [config.level=info] - Logging level to use, will show up as the <code>severity</code> field of an event, see
  *  [SplunkLogger.levels]{@link SplunkLogger#levels} for common levels.
- * @param {bool} [config.autoFlush=true] - Send events immediately or not.
+ * @param {number} [config.batchInterval=0] - Automatically flush events after this many milliseconds.
+ * When set to a non-positive value, events will be sent one by one. This setting is ignored when non-positive.
+ * @param {number} [config.maxBatchSize=0] - Automatically flush events after the size of queued
+ * events exceeds this many bytes. This setting is ignored when non-positive.
+ * @param {number} [config.maxBatchCount=1] - Automatically flush events after this many
+ * events have been queued. Defaults to flush immediately on sending an event. This setting is ignored when non-positive.
  * @constructor
  * @implements {@link https://nodejs.org/api/stream.html#stream_class_stream_writable|Stream.Writable}
  */
@@ -194,30 +200,30 @@ module.exports =  {
         /**
          * @typedef SplunkBunyanStream
          * @property {string} level The logging level for Bunyan.
-         * @property {string} type Always <code>raw</code>
-         * @property {function} use Takes a middleware function parameter: <code>function(context, next)</code>,
-         * this function must call <code>next(error, context)</code>.
-         * Adds an express-like middleware function to run before sending the
-         * data to Splunk. Multiple middleware functions can be used, they will be executed
-         * in the order they are added.
+         * @property {string} type Always <code>raw</code>.
          * @property {function} on Takes an <code>event</code> string, and a callback function.
          * The most useful event to listen for is <code>error</code>.
          * See {@link https://nodejs.org/api/events.html#events_emitter_on_event_listener|Node.js events} documentation.
-         * @property {function} flush When <code>config.autoFlush = false</code>, manually sends events to Splunk
-         * all queued events to Splunk in a single HTTP request. Takes a callback
-         * function parameter: <code>function(err, response, body)</code>.
+         * @property {function} setEventFormatter Overrides the eventFormatter for the underlying SplunkLogger.
+         * Takes a callback function parameter: <code>function(message, severity)</code>, where message
+         * is an object, and severity is a string.
+         * @property {function} on Adds a listener to to the SplunkStream object, typically used for the error event.
+         * @property {function} flush Manually sends all queued events to Splunk in a single HTTP request.
+         * Takes a callback function parameter: <code>function(err, response, body)</code>.
          * @property {SplunkStream} stream See {@link SplunkStream}
          */
         return {
             level: config.level || module.exports.levels.INFO,
             type: "raw",
-            use: function(middleware) {
-                this.stream.logger.use(middleware);
+            setEventFormatter: function(formatter) {
+                this.stream.logger.eventFormatter = formatter;
             },
             on: function(event, callback) {
                 this.stream.on(event, callback);
             },
             flush: function(callback) {
+                // If flush is called with no param, use the send() callback
+                callback = callback || this.stream.send;
                 this.stream.logger.flush(callback);
             },
             stream: stream

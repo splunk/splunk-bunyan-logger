@@ -16,13 +16,8 @@
 
 /**
  * This example shows how to batch events with the
- * the Splunk Bunyan logger by manually calling flush.
- *
- * By default autoFlush is enabled, this means
- * an HTTP request is made for each log message.
- *
- * By disabling autoFlush, events will be queued
- * until flush() is called.
+ * Splunk Bunyan logger with all available settings:
+ * batchInterval, maxBatchCount, & maxBatchSize.
  */
 
 // Change to require("splunk-bunyan-logger");
@@ -32,16 +27,16 @@ var bunyan = require("bunyan");
 /**
  * Only the token property is required.
  * 
- * Here, autoFlush is set to false
+ * Here, batchInterval is set to flush every 1 second, when
+ * 10 events are queued, or when the size of queued events totals
+ * more than 1kb.
  */
 var config = {
     token: "your-token-here",
-    host: "localhost",
-    path: "/services/collector/event/1.0",
-    protocol: "https",
-    port: 8088,
-    level: "info",
-    autoFlush: false
+    url: "https://localhost:8088",
+    batchInterval: 1000,
+    maxBatchCount: 10,
+    maxBatchSize: 1024 // 1kb
 };
 var splunkStream = splunkBunyan.createStream(config);
 
@@ -68,7 +63,7 @@ var payload = {
     source: "chicken coop",
     sourcetype: "httpevent",
     index: "main",
-    host: "farm.local",
+    host: "farm.local"
 };
 
 // Send the payload
@@ -84,7 +79,7 @@ var payload2 = {
     source: "chicken coop",
     sourcetype: "httpevent",
     index: "main",
-    host: "farm.local",
+    host: "farm.local"
 };
 
 // Send the payload
@@ -92,13 +87,14 @@ console.log("Queuing second payload", payload2);
 Logger.info(payload2, "New chickens have arrived");
 
 /**
- * Since autoFlush is disabled, call flush manually.
- * This will send both payloads in a single
- * HTTP request.
- *
- * The callback for flush is optional.
+ * Since we've configured batching, we don't need
+ * to do anything at this point. Events will
+ * will be sent to Splunk automatically based
+ * on the batching settings above.
  */
-splunkStream.flush(function(err, resp, body) {
-    // If successful, body will be { text: 'Success', code: 0 }
-    console.log("Response from Splunk", body);
-});
+
+// Kill the process
+setTimeout(function() {
+    console.log("Events should be in Splunk! Exiting...");
+    process.exit();
+}, 2000);

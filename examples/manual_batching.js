@@ -15,8 +15,11 @@
  */
 
 /**
- * This example shows basic usage of the Splunk
- * Bunyan logger.
+ * This example shows how to batch events with the
+ * the Splunk Bunyan logger by manually calling flush.
+ *
+ * By setting maxbatchCount=0, events will be queued
+ * until flush() is called.
  */
 
 // Change to require("splunk-bunyan-logger");
@@ -25,10 +28,13 @@ var bunyan = require("bunyan");
 
 /**
  * Only the token property is required.
+ * 
+ * Here, maxBatchCount is set to 0.
  */
 var config = {
-    token: "your-token-here",
-    url: "https://localhost:8088"
+    token: "56A70C3F-80C1-4879-B11F-BF043B52753F",//"your-token-here",
+    url: "https://localhost:8088",
+    maxBatchCount: 0
 };
 var splunkStream = splunkBunyan.createStream(config);
 
@@ -58,34 +64,34 @@ var payload = {
     host: "farm.local"
 };
 
-/**
- * Since maxBatchCount is set to 1 by default, calling send
- * will immediately send the payload.
- * 
- * The underlying HTTP POST request is made to
- *
- *     https://localhost:8088/services/collector/event/1.0
- *
- * with the following body
- *
- *     {
- *         "source": "chicken coop",
- *         "sourcetype": "httpevent",
- *         "index": "main",
- *         "host": "farm.local",
- *         "event": {
- *             "message": {
- *                 "chickenCount": 500
- *                 "msg": "Chicken coup looks stable.",
- *                 "name": "my logger",
- *                 "put": 98884,
- *                 "temperature": "70F",
- *                 "v": 0
- *             },
- *             "severity": "info"
- *         }
- *     }
- *
- */
-console.log("Sending payload", payload);
+// Send the payload
+console.log("Queuing payload", payload);
 Logger.info(payload, "Chicken coup looks stable.");
+
+var payload2 = {
+    // Our important fields
+    temperature: "75F",
+    chickenCount: 600,
+
+    // Special keys to specify metadata for Splunk's Event Collector
+    source: "chicken coop",
+    sourcetype: "httpevent",
+    index: "main",
+    host: "farm.local"
+};
+
+// Send the payload
+console.log("Queuing second payload", payload2);
+Logger.info(payload2, "New chickens have arrived");
+
+/**
+ * Call flush manually.
+ * This will send both payloads in a single
+ * HTTP request.
+ *
+ * The callback for flush is optional.
+ */
+splunkStream.flush(function(err, resp, body) {
+    // If successful, body will be { text: 'Success', code: 0 }
+    console.log("Response from Splunk", body);
+});

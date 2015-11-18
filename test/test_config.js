@@ -60,12 +60,13 @@ describe("createStream", function() {
         assert.strictEqual("https", splunkBunyanStream.stream.config().protocol);
         assert.strictEqual("info", splunkBunyanStream.stream.config().level);
         assert.strictEqual(8088, splunkBunyanStream.stream.config().port);
-        assert.strictEqual(true, splunkBunyanStream.stream.config().autoFlush);
+        assert.strictEqual(0, splunkBunyanStream.stream.config().maxRetries);
+        assert.strictEqual(0, splunkBunyanStream.stream.config().maxBatchSize);
+        assert.strictEqual(1, splunkBunyanStream.stream.config().maxBatchCount);
     });
     it("should create logger with manual batching enabled", function() {
         var config = {
-            token: "a-token-goes-here-usually",
-            autoFlush: false
+            token: "a-token-goes-here-usually"
         };
         var splunkBunyanStream = splunkBunyan.createStream(config);
 
@@ -83,7 +84,9 @@ describe("createStream", function() {
         assert.strictEqual("https", splunkBunyanStream.stream.config().protocol);
         assert.strictEqual("info", splunkBunyanStream.stream.config().level);
         assert.strictEqual(8088, splunkBunyanStream.stream.config().port);
-        assert.strictEqual(false, splunkBunyanStream.stream.config().autoFlush);
+        assert.strictEqual(0, splunkBunyanStream.stream.config().maxRetries);
+        assert.strictEqual(0, splunkBunyanStream.stream.config().maxBatchSize);
+        assert.strictEqual(1, splunkBunyanStream.stream.config().maxBatchCount);
     });
     it("should create logger with non-default name", function() {
         var config = {
@@ -106,6 +109,7 @@ describe("createStream", function() {
         assert.strictEqual("https", splunkBunyanStream.stream.config().protocol);
         assert.strictEqual("info", splunkBunyanStream.stream.config().level);
         assert.strictEqual(8088, splunkBunyanStream.stream.config().port);
+        assert.strictEqual(0, splunkBunyanStream.stream.config().maxRetries);
     });
     it("should create logger with non-default path", function() {
         var config = {
@@ -128,16 +132,14 @@ describe("createStream", function() {
         assert.strictEqual("https", splunkBunyanStream.stream.config().protocol);
         assert.strictEqual("info", splunkBunyanStream.stream.config().level);
         assert.strictEqual(8088, splunkBunyanStream.stream.config().port);
+        assert.strictEqual(0, splunkBunyanStream.stream.config().maxRetries);
     });
-    it("should create logger with non-default middleware", function() {
+    it("should create logger with maxRetries=5", function() {
         var config = {
-            token: "a-token-goes-here-usually"
+            token: "a-token-goes-here-usually",
+            maxRetries: 5
         };
         var splunkBunyanStream = splunkBunyan.createStream(config);
-
-        splunkBunyanStream.use(function(data, next) {
-            next(null, data);
-        });
 
         assert.ok(splunkBunyanStream);
         assert.strictEqual("info", splunkBunyanStream.level);
@@ -150,9 +152,58 @@ describe("createStream", function() {
         assert.strictEqual("splunk-bunyan-logger/0.8.0", splunkBunyanStream.stream.config().name);
         assert.strictEqual("localhost", splunkBunyanStream.stream.config().host);
         assert.strictEqual("/services/collector/event/1.0", splunkBunyanStream.stream.config().path);
-        assert.strictEqual(config.middleware, splunkBunyanStream.stream.config().middleware);
         assert.strictEqual("https", splunkBunyanStream.stream.config().protocol);
         assert.strictEqual("info", splunkBunyanStream.stream.config().level);
         assert.strictEqual(8088, splunkBunyanStream.stream.config().port);
+        assert.strictEqual(5, splunkBunyanStream.stream.config().maxRetries);
+    });
+    it("should create logger with maxBatchSize=100", function() {
+        var config = {
+            token: "a-token-goes-here-usually",
+            maxBatchSize: 100
+        };
+        var splunkBunyanStream = splunkBunyan.createStream(config);
+
+        assert.ok(splunkBunyanStream);
+        assert.strictEqual("info", splunkBunyanStream.level);
+        assert.strictEqual("raw", splunkBunyanStream.type);
+        assert.ok(splunkBunyanStream.hasOwnProperty("stream"));
+        assert.ok(splunkBunyanStream.stream.hasOwnProperty("logger"));
+        assert.ok(splunkBunyanStream.stream.logger.hasOwnProperty("config"));
+        assert.ok(splunkBunyanStream.stream.hasOwnProperty("send"));
+        assert.strictEqual(config.token, splunkBunyanStream.stream.config().token);
+        assert.strictEqual("splunk-bunyan-logger/0.8.0", splunkBunyanStream.stream.config().name);
+        assert.strictEqual("localhost", splunkBunyanStream.stream.config().host);
+        assert.strictEqual("/services/collector/event/1.0", splunkBunyanStream.stream.config().path);
+        assert.strictEqual("https", splunkBunyanStream.stream.config().protocol);
+        assert.strictEqual("info", splunkBunyanStream.stream.config().level);
+        assert.strictEqual(8088, splunkBunyanStream.stream.config().port);
+        assert.strictEqual(0, splunkBunyanStream.stream.config().maxRetries);
+        assert.strictEqual(100, splunkBunyanStream.stream.config().maxBatchSize);
+    });
+    it("should create logger with maxBatchCount=10", function() {
+        var config = {
+            token: "a-token-goes-here-usually",
+            maxBatchCount: 10
+        };
+        var splunkBunyanStream = splunkBunyan.createStream(config);
+
+        assert.ok(splunkBunyanStream);
+        assert.strictEqual("info", splunkBunyanStream.level);
+        assert.strictEqual("raw", splunkBunyanStream.type);
+        assert.ok(splunkBunyanStream.hasOwnProperty("stream"));
+        assert.ok(splunkBunyanStream.stream.hasOwnProperty("logger"));
+        assert.ok(splunkBunyanStream.stream.logger.hasOwnProperty("config"));
+        assert.ok(splunkBunyanStream.stream.hasOwnProperty("send"));
+        assert.strictEqual(config.token, splunkBunyanStream.stream.config().token);
+        assert.strictEqual("splunk-bunyan-logger/0.8.0", splunkBunyanStream.stream.config().name);
+        assert.strictEqual("localhost", splunkBunyanStream.stream.config().host);
+        assert.strictEqual("/services/collector/event/1.0", splunkBunyanStream.stream.config().path);
+        assert.strictEqual("https", splunkBunyanStream.stream.config().protocol);
+        assert.strictEqual("info", splunkBunyanStream.stream.config().level);
+        assert.strictEqual(8088, splunkBunyanStream.stream.config().port);
+        assert.strictEqual(0, splunkBunyanStream.stream.config().maxRetries);
+        assert.strictEqual(0, splunkBunyanStream.stream.config().maxBatchSize);
+        assert.strictEqual(10, splunkBunyanStream.stream.config().maxBatchCount);
     });
 });
