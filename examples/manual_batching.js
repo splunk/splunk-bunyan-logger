@@ -32,7 +32,7 @@ var bunyan = require("bunyan");
  * Here, maxBatchCount is set to 0.
  */
 var config = {
-    token: "56A70C3F-80C1-4879-B11F-BF043B52753F",//"your-token-here",
+    token: "your-token-here",
     url: "https://localhost:8088",
     maxBatchCount: 0
 };
