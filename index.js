@@ -204,6 +204,10 @@ module.exports =  {
          * @property {function} on Takes an <code>event</code> string, and a callback function.
          * The most useful event to listen for is <code>error</code>.
          * See {@link https://nodejs.org/api/events.html#events_emitter_on_event_listener|Node.js events} documentation.
+         * @property {function} setEventFormatter Overrides the eventFormatter for the underlying SplunkLogger.
+         * Takes a callback function parameter: <code>function(message, severity)</code>, where message
+         * is an object, and severity is a string.
+         * @property {function} on Adds a listener to to the SplunkStream object, typically used for the error event.
          * @property {function} flush Manually sends all queued events to Splunk in a single HTTP request.
          * Takes a callback function parameter: <code>function(err, response, body)</code>.
          * @property {SplunkStream} stream See {@link SplunkStream}
@@ -211,6 +215,9 @@ module.exports =  {
         return {
             level: config.level || module.exports.levels.INFO,
             type: "raw",
+            setEventFormatter: function(formatter) {
+                this.stream.logger.eventFormatter = formatter;
+            },
             on: function(event, callback) {
                 this.stream.on(event, callback);
             },
