@@ -51,13 +51,13 @@ var Logger = bunyan.createLogger({
     ]
 });
 
-// Define the payload to send to Splunk's Event Collector
+// Define the payload to send to HTTP Event Collector
 var payload = {
     // Our important fields
     temperature: "70F",
     chickenCount: 500,
 
-    // Special keys to specify metadata for Splunk's Event Collector
+    // Special keys to specify metadata for HTTP Event Collector
     source: "chicken coop",
     sourcetype: "httpevent",
     index: "main",

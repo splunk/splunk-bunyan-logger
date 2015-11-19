@@ -29,7 +29,7 @@ var SplunkLogger = SplunkLogging.Logger;
  * Defaults to <code>console.log</code> both values;
  *
  * @param {object} config - Configuration settings for a new [SplunkLogger]{@link SplunkLogger}.
- * @param {string} config.token - Splunk HTTP Event Collector token, required.
+ * @param {string} config.token - HTTP Event Collector token, required.
  * @param {string} [config.name=splunk-javascript-logging/0.9.0] - Name for this logger.
  * @param {string} [config.host=localhost] - Hostname or IP address of Splunk server.
  * @param {string} [config.maxRetries=0] - How many times to retry when HTTP POST to Splunk fails.
