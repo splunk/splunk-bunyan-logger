@@ -26,15 +26,15 @@ var bunyan = require("bunyan");
 /**
  * Only the token property is required.
  *
- * Here we've set maxRetries to 5,
+ * Here we've set maxRetries to 10,
  * If there are any connection errors the request
- * to Splunk will be retried up to 5 times.
+ * to Splunk will be retried up to 10 times.
  * The default is 0.
  */
 var config = {
     token: "your-token-here",
     url: "https://localhost:8088",
-    maxRetries: 5
+    maxRetries: 10
 };
 var splunkStream = splunkBunyan.createStream(config);
 
