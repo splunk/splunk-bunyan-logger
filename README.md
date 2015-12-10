@@ -1,27 +1,31 @@
-# Splunk HTTP Event Collector Stream for Bunyan (beta)
+ # Splunk HTTP Event Collector Stream for Bunyan
 
-#### Version 0.8.0
+#### Version 0.9.0
 
-This project provides a stream for Splunk's HTTP Event Collector to be used with [Bunyan](https://www.npmjs.com/package/bunyan).
+This project provides a [Bunyan](https://www.npmjs.com/package/bunyan) stream for HTTP Event Collector in Splunk Enterprise and Splunk Cloud.
 
 ## Requirements
 
-* Splunk 6.3+.
-* An HTTP Event Collector token from your Splunk server.
-* Node.js v0.10+.
+* Node.js v0.10 or later.
+* Splunk Enterprise 6.3.0 or later, or Splunk Cloud.
+* An HTTP Event Collector token from your Splunk Enterprise or Splunk Cloud server.
 * [Bunyan](https://www.npmjs.com/package/bunyan) (`npm install --save bunyan`).
 
 ## Installation
 
-If you already have Node.js and npm installed, simply run: `npm install --save splunk-bunyan-logger`.
+First, update npm to the latest version by running: `sudo npm install npm -g`.
+
+Then run: `npm install --save splunk-bunyan-logger`.
 
 ## Usage
 
-See the `examples` folder for more examples:
+See the `examples` folder for usage examples:
 
-* `basic.js`: shows how to configure a Bunyan stream and send a log message to Splunk.
-* `batching.js`: shows how to queue log messages, and send them in batches.
-* `middleware.js`: shows how to add an express-like middleware function to be called before sending log messages to Splunk.
+* `all_batching.js`: Shows how to configure a Bunyan Stream with the 3 batching settings: `batchInterval`, `maxBatchCount`, & `maxBatchSize`.
+* `basic.js`: Shows how to configure a Bunyan stream and send a log message to Splunk.
+* `custom_format.js`: Shows how to configure a Bunyan Stream to log messages to Splunk using a custom format.
+* `manual_batching.js`: Shows how to queue log messages, and send them in batches by manually calling `flush()`.
+* `retry.js`: Shows how to configure retries on errors.
 
 ### Basic example
 
@@ -45,7 +49,7 @@ var Logger = bunyan.createLogger({
 });
 
 var payload = {
-    // Message can be anything, doesn't have to be an object
+    // Message can be anything; doesn't have to be an object
     message: {
         temperature: "70F",
         chickenCount: 500
@@ -58,7 +62,7 @@ Logger.info(payload, "Chicken coup looks stable.");
 
 ## Community
 
-Stay connected with other developers building on Splunk.
+Stay connected with other developers building on Splunk software.
 
 <table>
 
@@ -91,7 +95,7 @@ Stay connected with other developers building on Splunk.
 
 ### Contact us
 
-You can reach the Developer Platform team at _devinfo@splunk.com_.
+You can reach the developer platform team at _devinfo@splunk.com_.
 
 ## License
 

@@ -18,10 +18,7 @@
  * This example shows how to batch events with the
  * the Splunk Bunyan logger by manually calling flush.
  *
- * By default autoFlush is enabled, this means
- * an HTTP request is made for each log message.
- *
- * By disabling autoFlush, events will be queued
+ * By setting maxbatchCount=0, events will be queued
  * until flush() is called.
  */
 
@@ -32,16 +29,12 @@ var bunyan = require("bunyan");
 /**
  * Only the token property is required.
  * 
- * Here, autoFlush is set to false
+ * Here, maxBatchCount is set to 0.
  */
 var config = {
     token: "your-token-here",
-    host: "localhost",
-    path: "/services/collector/event/1.0",
-    protocol: "https",
-    port: 8088,
-    level: "info",
-    autoFlush: false
+    url: "https://localhost:8088",
+    maxBatchCount: 0
 };
 var splunkStream = splunkBunyan.createStream(config);
 
@@ -58,17 +51,17 @@ var Logger = bunyan.createLogger({
     ]
 });
 
-// Define the payload to send to Splunk's Event Collector
+// Define the payload to send to HTTP Event Collector
 var payload = {
     // Our important fields
     temperature: "70F",
     chickenCount: 500,
 
-    // Special keys to specify metadata for Splunk's Event Collector
+    // Special keys to specify metadata for HTTP Event Collector
     source: "chicken coop",
     sourcetype: "httpevent",
     index: "main",
-    host: "farm.local",
+    host: "farm.local"
 };
 
 // Send the payload
@@ -80,11 +73,11 @@ var payload2 = {
     temperature: "75F",
     chickenCount: 600,
 
-    // Special keys to specify metadata for Splunk's Event Collector
+    // Special keys to specify metadata for HTTP Event Collector
     source: "chicken coop",
     sourcetype: "httpevent",
     index: "main",
-    host: "farm.local",
+    host: "farm.local"
 };
 
 // Send the payload
@@ -92,7 +85,7 @@ console.log("Queuing second payload", payload2);
 Logger.info(payload2, "New chickens have arrived");
 
 /**
- * Since autoFlush is disabled, call flush manually.
+ * Call flush manually.
  * This will send both payloads in a single
  * HTTP request.
  *
