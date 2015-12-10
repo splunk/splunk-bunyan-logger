@@ -15,8 +15,8 @@
  */
 
 /**
- * This example shows how to use middleware with the Splunk
- * Bunyan logger.
+ * This example shows how to configure retries on errors
+ * with the Splunk Bunyan logger.
  */
 
 // Change to require("splunk-bunyan-logger");
@@ -25,42 +25,22 @@ var bunyan = require("bunyan");
 
 /**
  * Only the token property is required.
- * Defaults are listed explicitly.
  *
- * Alternatively, specify config.url like so:
- *
- * "https://localhost:8088/services/collector/event/1.0"
+ * Here we've set maxRetries to 10,
+ * If there are any connection errors the request
+ * to Splunk will be retried up to 10 times.
+ * The default is 0.
  */
 var config = {
     token: "your-token-here",
-    host: "localhost",
-    path: "/services/collector/event/1.0",
-    protocol: "https",
-    port: 8088,
-    level: "info",
-    autoFlush: true
+    url: "https://localhost:8088",
+    maxRetries: 10
 };
 var splunkStream = splunkBunyan.createStream(config);
 
 splunkStream.on("error", function(err, context) {
     // Handle errors here
     console.log("Error", err, "Context", context);
-});
-
-// Add a middleware function
-splunkStream.use(function(context, next) {
-    console.log("Message before middleware", context.message);
-
-    // Add a property to the message if it's an object
-    if (typeof context.message === "object") {
-        context.message.nestedValue = {
-            b00l: true,
-            another: "string"
-        };
-    }
-
-    console.log("Message after middleware", context.message);
-    next(null, context);
 });
 
 // Setup Bunyan, adding splunkStream to the array of streams
@@ -71,19 +51,19 @@ var Logger = bunyan.createLogger({
     ]
 });
 
-// Define the payload to send to Splunk's Event Collector
+// Define the payload to send to HTTP Event Collector
 var payload = {
     // Our important fields
     temperature: "70F",
     chickenCount: 500,
 
-    // Special keys to specify metadata for Splunk's Event Collector
+    // Special keys to specify metadata for HTTP Event Collector
     source: "chicken coop",
     sourcetype: "httpevent",
     index: "main",
-    host: "farm.local",
+    host: "farm.local"
 };
 
 // Send the payload
 console.log("Sending payload", payload);
-Logger.info(payload, "description of payload");
+Logger.info(payload, "Chicken coup looks stable.");

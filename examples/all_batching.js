@@ -15,8 +15,9 @@
  */
 
 /**
- * This example shows basic usage of the Splunk
- * Bunyan logger.
+ * This example shows how to batch events with the
+ * Splunk Bunyan logger with all available settings:
+ * batchInterval, maxBatchCount, & maxBatchSize.
  */
 
 // Change to require("splunk-bunyan-logger");
@@ -25,10 +26,17 @@ var bunyan = require("bunyan");
 
 /**
  * Only the token property is required.
+ * 
+ * Here, batchInterval is set to flush every 1 second, when
+ * 10 events are queued, or when the size of queued events totals
+ * more than 1kb.
  */
 var config = {
     token: "your-token-here",
-    url: "https://localhost:8088"
+    url: "https://localhost:8088",
+    batchInterval: 1000,
+    maxBatchCount: 10,
+    maxBatchSize: 1024 // 1kb
 };
 var splunkStream = splunkBunyan.createStream(config);
 
@@ -45,47 +53,48 @@ var Logger = bunyan.createLogger({
     ]
 });
 
-// Define the payload to send to HTTP Event Collector
+// Define the payload to send to Splunk's Event Collector
 var payload = {
     // Our important fields
     temperature: "70F",
     chickenCount: 500,
 
-    // Special keys to specify metadata for HTTP Event Collector
+    // Special keys to specify metadata for Splunk's Event Collector
     source: "chicken coop",
     sourcetype: "httpevent",
     index: "main",
     host: "farm.local"
 };
 
-/**
- * Since maxBatchCount is set to 1 by default, calling send
- * will immediately send the payload.
- * 
- * The underlying HTTP POST request is made to
- *
- *     https://localhost:8088/services/collector/event/1.0
- *
- * with the following body
- *
- *     {
- *         "source": "chicken coop",
- *         "sourcetype": "httpevent",
- *         "index": "main",
- *         "host": "farm.local",
- *         "event": {
- *             "message": {
- *                 "chickenCount": 500
- *                 "msg": "Chicken coup looks stable.",
- *                 "name": "my logger",
- *                 "put": 98884,
- *                 "temperature": "70F",
- *                 "v": 0
- *             },
- *             "severity": "info"
- *         }
- *     }
- *
- */
-console.log("Sending payload", payload);
+// Send the payload
+console.log("Queuing payload", payload);
 Logger.info(payload, "Chicken coup looks stable.");
+
+var payload2 = {
+    // Our important fields
+    temperature: "75F",
+    chickenCount: 600,
+
+    // Special keys to specify metadata for Splunk's Event Collector
+    source: "chicken coop",
+    sourcetype: "httpevent",
+    index: "main",
+    host: "farm.local"
+};
+
+// Send the payload
+console.log("Queuing second payload", payload2);
+Logger.info(payload2, "New chickens have arrived");
+
+/**
+ * Since we've configured batching, we don't need
+ * to do anything at this point. Events will
+ * will be sent to Splunk automatically based
+ * on the batching settings above.
+ */
+
+// Kill the process
+setTimeout(function() {
+    console.log("Events should be in Splunk! Exiting...");
+    process.exit();
+}, 2000);
