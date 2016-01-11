@@ -1,6 +1,6 @@
  # Splunk HTTP Event Collector Stream for Bunyan
 
-#### Version 0.9.0
+#### Version 0.9.1
 
 This project provides a [Bunyan](https://www.npmjs.com/package/bunyan) stream for HTTP Event Collector in Splunk Enterprise and Splunk Cloud.
 
