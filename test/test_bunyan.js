@@ -83,7 +83,6 @@ describe("Bunyan", function() {
             assert.ok(context);
             assert.strictEqual(err.code, "ENOTFOUND");
             assert.strictEqual(err.errno, "ENOTFOUND");
-            assert.strictEqual(err.message, "getaddrinfo ENOTFOUND");
             unmute();
             done();
         });

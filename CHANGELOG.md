@@ -1,5 +1,11 @@
 # Splunk HTTP Event Collector Stream for Bunyan
 
+## v0.9.1
+
+### Bug Fixes
+
+* Relax port validation for ports < 1000.
+
 ## v0.9.0
 
 ### New Features & APIs
