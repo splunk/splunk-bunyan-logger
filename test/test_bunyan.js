@@ -109,8 +109,7 @@ describe("Bunyan", function() {
         splunkBunyanStream.stream.send = function(err, resp, body) {
             assert.ok(!err);
             assert.ok(run);
-            assert.strictEqual(resp.headers["content-type"], "application/json; charset=UTF-8");
-            assert.strictEqual(resp.body, body);
+            assert.strictEqual(resp.body, JSON.stringify(body));
             assert.strictEqual(body.text, invalidTokenBody.text);
             assert.strictEqual(body.code, invalidTokenBody.code);
             unmute();
@@ -157,8 +156,7 @@ describe("Bunyan", function() {
         splunkBunyanStream.stream.send = function(err, resp, body) {
             assert.ok(!err);
             assert.ok(run);
-            assert.strictEqual(resp.headers["content-type"], "application/json; charset=UTF-8");
-            assert.strictEqual(resp.body, body);
+            assert.strictEqual(resp.body, JSON.stringify(body));
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
             done();
@@ -196,8 +194,7 @@ describe("Bunyan", function() {
         splunkBunyanStream.stream.send = function(err, resp, body) {
             assert.ok(!err);
             assert.ok(run);
-            assert.strictEqual(resp.headers["content-type"], "application/json; charset=UTF-8");
-            assert.strictEqual(resp.body, body);
+            assert.strictEqual(resp.body, JSON.stringify(body));
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
             done();
@@ -235,8 +232,7 @@ describe("Bunyan", function() {
         splunkBunyanStream.stream.send = function(err, resp, body) {
             assert.ok(!err);
             assert.ok(run);
-            assert.strictEqual(resp.headers["content-type"], "application/json; charset=UTF-8");
-            assert.strictEqual(resp.body, body);
+            assert.strictEqual(resp.body, JSON.stringify(body));
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
             done();
@@ -273,8 +269,7 @@ describe("Bunyan", function() {
         splunkBunyanStream.stream.send = function(err, resp, body) {
             assert.ok(!err);
             assert.ok(run);
-            assert.strictEqual(resp.headers["content-type"], "application/json; charset=UTF-8");
-            assert.strictEqual(resp.body, body);
+            assert.strictEqual(resp.body, JSON.stringify(body));
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
             done();
@@ -312,8 +307,7 @@ describe("Bunyan", function() {
         splunkBunyanStream.stream.send = function(err, resp, body) {
             assert.ok(!err);
             assert.ok(run);
-            assert.strictEqual(resp.headers["content-type"], "application/json; charset=UTF-8");
-            assert.strictEqual(resp.body, body);
+            assert.strictEqual(resp.body, JSON.stringify(body));
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
             done();
@@ -351,8 +345,7 @@ describe("Bunyan", function() {
         splunkBunyanStream.stream.send = function(err, resp, body) {
             assert.ok(!err);
             assert.ok(run);
-            assert.strictEqual(resp.headers["content-type"], "application/json; charset=UTF-8");
-            assert.strictEqual(resp.body, body);
+            assert.strictEqual(resp.body, JSON.stringify(body));
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
             done();
@@ -387,8 +380,7 @@ describe("Bunyan", function() {
         // Override the default send function
         splunkBunyanStream.stream.send = function(err, resp, body) {
             assert.ok(!err);
-            assert.strictEqual(resp.headers["content-type"], "application/json; charset=UTF-8");
-            assert.strictEqual(resp.body, body);
+            assert.strictEqual(resp.body, JSON.stringify(body));
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
             done();
@@ -412,8 +404,7 @@ describe("Bunyan", function() {
         // Override the default send function
         splunkBunyanStream.stream.send = function(err, resp, body) {
             assert.ok(!err);
-            assert.strictEqual(resp.headers["content-type"], "application/json; charset=UTF-8");
-            assert.strictEqual(resp.body, body);
+            assert.strictEqual(resp.body, JSON.stringify(body));
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
             done();
@@ -437,8 +428,7 @@ describe("Bunyan", function() {
         // Override the default send function
         splunkBunyanStream.stream.send = function(err, resp, body) {
             assert.ok(!err);
-            assert.strictEqual(resp.headers["content-type"], "application/json; charset=UTF-8");
-            assert.strictEqual(resp.body, body);
+            assert.strictEqual(resp.body, JSON.stringify(body));
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
             done();
@@ -462,8 +452,7 @@ describe("Bunyan", function() {
         // Override the default send function
         splunkBunyanStream.stream.send = function(err, resp, body) {
             assert.ok(!err);
-            assert.strictEqual(resp.headers["content-type"], "application/json; charset=UTF-8");
-            assert.strictEqual(resp.body, body);
+            assert.strictEqual(resp.body, JSON.stringify(body));
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
             done();
@@ -487,8 +476,7 @@ describe("Bunyan", function() {
         // Override the default send function
         splunkBunyanStream.stream.send = function(err, resp, body) {
             assert.ok(!err);
-            assert.strictEqual(resp.headers["content-type"], "application/json; charset=UTF-8");
-            assert.strictEqual(resp.body, body);
+            assert.strictEqual(resp.body, JSON.stringify(body));
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
             done();
@@ -513,8 +501,7 @@ describe("Bunyan", function() {
         // Override the default send function
         splunkBunyanStream.stream.send = function(err, resp, body) {
             assert.ok(!err);
-            assert.strictEqual(resp.headers["content-type"], "application/json; charset=UTF-8");
-            assert.strictEqual(resp.body, body);
+            assert.strictEqual(resp.body, JSON.stringify(body));
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
             done();
@@ -538,8 +525,7 @@ describe("Bunyan", function() {
         // Override the default send function
         splunkBunyanStream.stream.send = function(err, resp, body) {
             assert.ok(!err);
-            assert.strictEqual(resp.headers["content-type"], "application/json; charset=UTF-8");
-            assert.strictEqual(resp.body, body);
+            assert.strictEqual(resp.body, JSON.stringify(body));
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
             done();
@@ -569,8 +555,7 @@ describe("Bunyan", function() {
         splunkBunyanStream.stream.send = function(err, resp, body) {
             count++;
             assert.ok(!err);
-            assert.strictEqual(resp.headers["content-type"], "application/json; charset=UTF-8");
-            assert.strictEqual(resp.body, body);
+            assert.strictEqual(resp.body, JSON.stringify(body));
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
             if (count === 2) {
@@ -628,8 +613,7 @@ describe("Bunyan", function() {
         splunkBunyanStream.stream.send = function(err, resp, body) {
             count++;
             assert.ok(!err);
-            assert.strictEqual(resp.headers["content-type"], "application/json; charset=UTF-8");
-            assert.strictEqual(resp.body, body);
+            assert.strictEqual(resp.body, JSON.stringify(body));
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
             if (count === 2) {
@@ -680,8 +664,7 @@ describe("Bunyan", function() {
         splunkBunyanStream.flush(function(err, resp, body) {
             assert.ok(!err);
             assert.ok(!run); // Shouldn't execute the stream.send() above
-            assert.strictEqual(resp.headers["content-type"], "application/json; charset=UTF-8");
-            assert.strictEqual(resp.body, body);
+            assert.strictEqual(resp.body, JSON.stringify(body));
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
             done();
@@ -697,8 +680,7 @@ describe("Bunyan", function() {
         // Wrap the default send function
         var send = splunkBunyanStream.stream.send;
         splunkBunyanStream.stream.send = function(err, resp, body) {
-            assert.strictEqual(resp.headers["content-type"], "application/json; charset=UTF-8");
-            assert.strictEqual(resp.body, body);
+            assert.strictEqual(resp.body, JSON.stringify(body));
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
             send(err, resp, body);
