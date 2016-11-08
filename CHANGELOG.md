@@ -1,5 +1,13 @@
 # Splunk HTTP Event Collector Stream for Bunyan
 
+## v0.9.2
+
+### Bug Fixes
+
+* Workaround a urlencoding bug in the request library (GitHub issue [#6](https://github.com/splunk/splunk-javascript-logging/issues/6) for the underlying `splunk-logging` library).
+* Catch JSON parsing errors from the server without crashing (GitHub issue [#9](https://github.com/splunk/splunk-javascript-logging/issues/9) for the underlying `splunk-logging` library).
+
+
 ## v0.9.1
 
 ### Bug Fixes
