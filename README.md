@@ -27,6 +27,33 @@ See the `examples` folder for usage examples:
 * `manual_batching.js`: Shows how to queue log messages, and send them in batches by manually calling `flush()`.
 * `retry.js`: Shows how to configure retries on errors.
 
+### SSL
+
+Note: SSL certificate validation is diabled by default.
+To enable it, set `logger.requestOptions.strictSSL = true` on your `SplunkStream` instance:
+
+```javascript
+var bunyan = require("bunyan");
+var splunkBunyan = require("splunk-bunyan-logger");
+
+var config = {
+    token: "your-token-here",
+    url: "https://splunk.local:8088"
+};
+
+var splunkStream = splunkBunyan.createStream(config);
+// Enable SSL certificate validation
+stream.logger.requestOptions.strictSSL = true;
+
+// Note: splunkStream must be set to an element in the streams array
+var Logger = bunyan.createLogger({
+    name: "my logger",
+    streams: [
+        splunkStream
+    ]
+});
+```
+
 ### Basic example
 
 ```javascript
