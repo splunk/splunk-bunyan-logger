@@ -1,5 +1,11 @@
 # Splunk HTTP Event Collector Stream for Bunyan
 
+## v0.9.3
+
+### Minor changes
+
+* Update version of `splunk-logging` dependency, allowing new installs to receive security updates to the transitive `request` dependency.
+
 ## v0.9.2
 
 ### Bug Fixes
