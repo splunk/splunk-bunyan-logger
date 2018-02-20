@@ -16,17 +16,11 @@
 
 var splunkBunyan = require("../index");
 var assert = require("assert");
+var request = require("request");
 
 /** Integration Tests **/
 
-/**
- * Load test configuration from test/config.json
- * It just needs a token:
- *
- *     {"token": "token-goes-here"}
- *
- */
-var configurationFile = require("./config.json");
+var TOKEN;
 
 var successBody = {
     text: "Success",
@@ -69,11 +63,35 @@ function formatForBunyan(data) {
     return ret;
 }
 
+describe("Setup Splunk on localhost:8089 HEC", function() {
+    it("should be enabled", function(done) {
+        request.post("https://admin:changeme@localhost:8089/servicesNS/admin/splunk_httpinput/data/inputs/http/http/enable?output_mode=json", {strictSSL: false}, function(err) {
+            assert.ok(!err);
+            done();
+        });
+    });
+    it("should create a token in test/config.json", function(done) {
+        request.post("https://admin:changeme@localhost:8089/servicesNS/admin/splunk_httpinput/data/inputs/http?output_mode=json", {strictSSL: false, body: "name=splunk_logging" + Date.now()}, function(err, resp, body) {
+            assert.ok(!err);
+            var tokenStart = body.indexOf("\"token\":\"");
+            var tokenEnd = tokenStart + 36; // 36 = guid length
+            var token = body.substring(tokenStart + 9, tokenEnd + 9); // 9 = prefix length of \"token\":\"
+            assert.strictEqual(token.length, 36);
+            TOKEN = token;
+            done();
+        });
+    });
+    it("should have the env variable set", function() {
+        assert.ok(TOKEN);
+        assert.strictEqual(TOKEN.length, 36);
+    });
+});
+
 describe("SplunkStream", function() {
+
     it("should write a string", function(done) {
         var config = {
-            token: configurationFile.token
-        };
+            token: TOKEN,        };
 
         var splunkBunyanStream = splunkBunyan.createStream(config);
 
@@ -152,7 +170,7 @@ describe("SplunkStream", function() {
     });
     it("should emit error when writing without args", function(done) {
         var config = {
-            token: configurationFile.token,
+            token: TOKEN,
             maxBatchCount: 1
         };
         var splunkBunyanStream = splunkBunyan.createStream(config);
@@ -196,7 +214,7 @@ describe("SplunkStream", function() {
     it("should retry on network error, bad host", function(done) {
         this.timeout(3 * 1000);
         var config = {
-            token: configurationFile.token,
+            token: TOKEN,
             maxRetries: 3,
             host: "splunk.invalid",
             maxBatchCount: 1
@@ -226,7 +244,7 @@ describe("SplunkStream", function() {
     it("should retry on network error, wrong port", function(done) {
         this.timeout(3 * 1000);
         var config = {
-            token: configurationFile.token,
+            token: TOKEN,
             maxRetries: 3,
             port: 1075,
             maxBatchCount: 1
