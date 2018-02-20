@@ -17,15 +17,9 @@
 var SplunkBunyan = require("../index");
 var assert = require("assert");
 var bunyan = require("bunyan");
+var request = require("request");
 
-/**
- * Load test configuration from test/config.json
- * It just needs a token:
- *
- *     {"token": "token-goes-here"}
- *
- */
-var configurationFile = require("./config.json");
+var TOKEN;
 
 var successBody = {
     text: "Success",
@@ -52,9 +46,57 @@ function unmute() {
     console.log = ____consoleLog;
 }
 
+describe("Setup Splunk on localhost:8089 HEC", function() {
+    it("should be enabled", function(done) {
+        request.post("https://admin:changeme@localhost:8089/servicesNS/admin/splunk_httpinput/data/inputs/http/http/enable?output_mode=json", {strictSSL: false}, function(err) {
+            assert.ok(!err);
+            done();
+        });
+    });
+    it("should create a token in test/config.json", function(done) {
+        request.post("https://admin:changeme@localhost:8089/servicesNS/admin/splunk_httpinput/data/inputs/http?output_mode=json", {strictSSL: false, body: "name=splunk_logging" + Date.now()}, function(err, resp, body) {
+            assert.ok(!err);
+            var tokenStart = body.indexOf("\"token\":\"");
+            var tokenEnd = tokenStart + 36; // 36 = guid length
+            var token = body.substring(tokenStart + 9, tokenEnd + 9); // 9 = prefix length of \"token\":\"
+            assert.strictEqual(token.length, 36);
+            TOKEN = token;
+            done();
+        });
+    });
+    it("should have the env variable set", function() {
+        assert.ok(TOKEN);
+        assert.strictEqual(TOKEN.length, 36);
+    });
+});
+
 describe("Bunyan", function() {
+    describe("Setup Splunk on localhost:8089 HEC", function() {
+        it("should be enabled", function(done) {
+            request.post("https://admin:changeme@localhost:8089/servicesNS/admin/splunk_httpinput/data/inputs/http/http/enable?output_mode=json", {strictSSL: false}, function(err) {
+                assert.ok(!err);
+                done();
+            });
+        });
+        it("should create a token in test/config.json", function(done) {
+            request.post("https://admin:changeme@localhost:8089/servicesNS/admin/splunk_httpinput/data/inputs/http?output_mode=json", {strictSSL: false, body: "name=splunk_logging" + Date.now()}, function(err, resp, body) {
+                assert.ok(!err);
+                var tokenStart = body.indexOf("\"token\":\"");
+                var tokenEnd = tokenStart + 36; // 36 = guid length
+                var token = body.substring(tokenStart + 9, tokenEnd + 9); // 9 = prefix length of \"token\":\"
+                assert.strictEqual(token.length, 36);
+                TOKEN = token;
+                done();
+            });
+        });
+        it("should have the env variable set", function() {
+            assert.ok(TOKEN);
+            assert.strictEqual(TOKEN.length, 36);
+        });
+    });
+
     it("should create logger with SplunkStream", function() {
-        var splunkBunyanStream = SplunkBunyan.createStream(configurationFile);
+        var splunkBunyanStream = SplunkBunyan.createStream({token: TOKEN});
 
         assert.ok(splunkBunyanStream);
 
@@ -145,7 +187,7 @@ describe("Bunyan", function() {
     });
     it("should succeed in sending data as trace with valid token", function(done) {
         var config = {
-            token: configurationFile.token,
+            token: TOKEN,
             level: "trace"
         };
         var splunkBunyanStream = SplunkBunyan.createStream(config);
@@ -183,7 +225,7 @@ describe("Bunyan", function() {
     });
     it("should succeed in sending data as debug with valid token", function(done) {
         var config = {
-            token: configurationFile.token,
+            token: TOKEN,
             level: "debug"
         };
         var splunkBunyanStream = SplunkBunyan.createStream(config);
@@ -222,7 +264,7 @@ describe("Bunyan", function() {
     });
     it("should succeed in sending data as info with valid token", function(done) {
         var config = {
-            token: configurationFile.token
+            token: TOKEN
         };
         var splunkBunyanStream = SplunkBunyan.createStream(config);
 
@@ -259,7 +301,7 @@ describe("Bunyan", function() {
     });
     it("should succeed in sending data as warn with valid token", function(done) {
         var config = {
-            token: configurationFile.token
+            token: TOKEN
         };
         var splunkBunyanStream = SplunkBunyan.createStream(config);
 
@@ -297,7 +339,7 @@ describe("Bunyan", function() {
     });
     it("should succeed in sending data as error with valid token", function(done) {
         var config = {
-            token: configurationFile.token
+            token: TOKEN
         };
         var splunkBunyanStream = SplunkBunyan.createStream(config);
 
@@ -335,7 +377,7 @@ describe("Bunyan", function() {
     });
     it("should succeed in sending data as fatal with valid token", function(done) {
         var config = {
-            token: configurationFile.token
+            token: TOKEN
         };
         var splunkBunyanStream = SplunkBunyan.createStream(config);
 
@@ -373,7 +415,7 @@ describe("Bunyan", function() {
     });
     it("should succeed in sending data with valid token using custom time", function(done) {
         var config = {
-            token: configurationFile.token
+            token: TOKEN
         };
         var splunkBunyanStream = SplunkBunyan.createStream(config);
 
@@ -397,7 +439,7 @@ describe("Bunyan", function() {
     });
     it("should succeed in sending data with valid token using custom host", function(done) {
         var config = {
-            token: configurationFile.token
+            token: TOKEN
         };
         var splunkBunyanStream = SplunkBunyan.createStream(config);
 
@@ -421,7 +463,7 @@ describe("Bunyan", function() {
     });
     it("should succeed in sending data with valid token using custom source", function(done) {
         var config = {
-            token: configurationFile.token
+            token: TOKEN
         };
         var splunkBunyanStream = SplunkBunyan.createStream(config);
 
@@ -445,7 +487,7 @@ describe("Bunyan", function() {
     });
     it("should succeed in sending data with valid token using custom sourcetype", function(done) {
         var config = {
-            token: configurationFile.token
+            token: TOKEN
         };
         var splunkBunyanStream = SplunkBunyan.createStream(config);
 
@@ -469,7 +511,7 @@ describe("Bunyan", function() {
     });
     it("should succeed in sending data with valid token to any index", function(done) {
         var config = {
-            token: configurationFile.token
+            token: TOKEN
         };
         var splunkBunyanStream = SplunkBunyan.createStream(config);
 
@@ -494,7 +536,7 @@ describe("Bunyan", function() {
     // TODO: test successfully sending to another index
     it("should succeed in sending array data with valid token", function(done) {
         var config = {
-            token: configurationFile.token
+            token: TOKEN
         };
         var splunkBunyanStream = SplunkBunyan.createStream(config);
 
@@ -518,7 +560,7 @@ describe("Bunyan", function() {
     });
     it("should succeed in sending data as object with valid token", function(done) {
         var config = {
-            token: configurationFile.token
+            token: TOKEN
         };
         var splunkBunyanStream = SplunkBunyan.createStream(config);
 
@@ -545,7 +587,7 @@ describe("Bunyan", function() {
     });
     it("should succeed in sending data twice with valid token", function(done) {
         var config = {
-            token: configurationFile.token
+            token: TOKEN
         };
         var splunkBunyanStream = SplunkBunyan.createStream(config);
 
@@ -575,7 +617,7 @@ describe("Bunyan", function() {
     });
     it("should succeed in sending data using custom eventFormatter with valid token", function(done) {
         var config = {
-            token: configurationFile.token
+            token: TOKEN
         };
         var splunkBunyanStream = SplunkBunyan.createStream(config);
 
@@ -633,7 +675,7 @@ describe("Bunyan", function() {
     });
     it("should succeed in sending data twice with valid token with batching off, flush(err, resp, body)", function(done) {
         var config = {
-            token: configurationFile.token,
+            token: TOKEN,
             maxBatchCount: 0
         };
         var splunkBunyanStream = SplunkBunyan.createStream(config);
@@ -672,7 +714,7 @@ describe("Bunyan", function() {
     });
     it("should succeed in sending data twice with valid token with batching off, flush()", function(done) {
         var config = {
-            token: configurationFile.token,
+            token: TOKEN,
             maxBatchCount: 0
         };
         var splunkBunyanStream = SplunkBunyan.createStream(config);
@@ -739,7 +781,7 @@ describe("Bunyan", function() {
     });
     it("should retry on network error", function(done) {
         var config = {
-            token: configurationFile.token,
+            token: TOKEN,
             maxRetries: 5,
             host: "splunk.invalid"
         };
@@ -774,7 +816,7 @@ describe("Bunyan", function() {
     });
     it("should be noop when nothing to flush", function(done) {
         var config = {
-            token: configurationFile.token,
+            token: TOKEN,
             batchInterval: 100
         };
         var splunkBunyanStream = SplunkBunyan.createStream(config);
@@ -822,7 +864,7 @@ describe("Bunyan", function() {
     });
     it("should post once for 1 event", function(done) {
         var config = {
-            token: configurationFile.token,
+            token: TOKEN,
             batchInterval: 100
         };
         var splunkBunyanStream = SplunkBunyan.createStream(config);
@@ -873,7 +915,7 @@ describe("Bunyan", function() {
     });
     it("should post once for 2 events", function(done) {
         var config = {
-            token: configurationFile.token,
+            token: TOKEN,
             batchInterval: 100,
             maxBatchCount: 2
         };
@@ -927,7 +969,7 @@ describe("Bunyan", function() {
     });
     it("should post once for 5 events", function(done) {
         var config = {
-            token: configurationFile.token,
+            token: TOKEN,
             batchInterval: 100,
             maxBatchCount: 5
         };
@@ -984,7 +1026,7 @@ describe("Bunyan", function() {
     });
     it("should flush a stale event after enabling batching & setting batchInterval", function(done) {
         var config = {
-            token: configurationFile.token,
+            token: TOKEN,
             maxBatchCount: 0
         };
         var splunkBunyanStream = SplunkBunyan.createStream(config);
@@ -1038,7 +1080,7 @@ describe("Bunyan", function() {
     });
     it("should flush first event immediately with maxBatchSize=1", function(done) {
         var config = {
-            token: configurationFile.token
+            token: TOKEN
         };
         var splunkBunyanStream = SplunkBunyan.createStream(config);
 
@@ -1086,7 +1128,7 @@ describe("Bunyan", function() {
     });
     it("should flush first 2 events after maxBatchSize>200", function(done) {
         var config = {
-            token: configurationFile.token,
+            token: TOKEN,
             maxBatchSize: 200,
             maxBatchCount: 2
         };
@@ -1147,7 +1189,7 @@ describe("Bunyan", function() {
     });
     it("should flush first event after 200ms, with maxBatchSize=200", function(done) {
         var config = {
-            token: configurationFile.token,
+            token: TOKEN,
             maxBatchSize: 200,
             batchInterval: 200,
             maxBatchCount: 0
@@ -1212,7 +1254,7 @@ describe("Bunyan", function() {
     });
     it("should flush first event immediately with maxBatchCount=1", function(done) {
         var config = {
-            token: configurationFile.token,
+            token: TOKEN,
             maxBatchSize: 123456
         };
         var splunkBunyanStream = SplunkBunyan.createStream(config);
@@ -1271,7 +1313,7 @@ describe("Bunyan", function() {
     });
     it("should flush first 2 events after maxBatchSize>200", function(done) {
         var config = {
-            token: configurationFile.token,
+            token: TOKEN,
             maxBatchSize: 200,
             maxBatchCount: 2
         };
@@ -1332,7 +1374,7 @@ describe("Bunyan", function() {
     });
     it("should flush first event after 200ms, with maxBatchSize=200", function(done) {
         var config = {
-            token: configurationFile.token,
+            token: TOKEN,
             maxBatchSize: 200,
             batchInterval: 200,
             maxBatchCount: 10
