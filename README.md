@@ -6,7 +6,7 @@ This project provides a [Bunyan](https://www.npmjs.com/package/bunyan) stream fo
 
 ## Requirements
 
-* Node.js v0.10 or later.
+* Node.js v4 or later.
 * Splunk Enterprise 6.3.0 or later, or Splunk Cloud.
 * An HTTP Event Collector token from your Splunk Enterprise or Splunk Cloud server.
 * [Bunyan](https://www.npmjs.com/package/bunyan) (`npm install --save bunyan`).
