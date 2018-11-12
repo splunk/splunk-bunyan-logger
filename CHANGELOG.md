@@ -1,5 +1,11 @@
 # Splunk HTTP Event Collector Stream for Bunyan
 
+## v0.10.1
+
+### Breaking changes
+
+* Dropped support for Node.js versions older than 4.0.0.
+
 ## v0.9.3
 
 ### Minor changes
