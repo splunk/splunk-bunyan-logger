@@ -99,7 +99,7 @@ describe("SplunkStream", function() {
         assert.strictEqual("info", splunkBunyanStream.level);
         assert.strictEqual("raw", splunkBunyanStream.type);
         assert.strictEqual(config.token, splunkBunyanStream.stream.config().token);
-        assert.strictEqual("splunk-bunyan-logger/0.9.3", splunkBunyanStream.stream.config().name);
+        assert.strictEqual("splunk-bunyan-logger/0.10.1", splunkBunyanStream.stream.config().name);
         assert.strictEqual("localhost", splunkBunyanStream.stream.config().host);
         assert.strictEqual("https", splunkBunyanStream.stream.config().protocol);
         assert.strictEqual("info", splunkBunyanStream.stream.config().level);
@@ -132,7 +132,7 @@ describe("SplunkStream", function() {
         assert.strictEqual("info", splunkBunyanStream.level);
         assert.strictEqual("raw", splunkBunyanStream.type);
         assert.strictEqual(config.token, splunkBunyanStream.stream.config().token);
-        assert.strictEqual("splunk-bunyan-logger/0.9.3", splunkBunyanStream.stream.config().name);
+        assert.strictEqual("splunk-bunyan-logger/0.10.1", splunkBunyanStream.stream.config().name);
         assert.strictEqual("localhost", splunkBunyanStream.stream.config().host);
         assert.strictEqual("https", splunkBunyanStream.stream.config().protocol);
         assert.strictEqual("info", splunkBunyanStream.stream.config().level);
