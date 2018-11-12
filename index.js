@@ -30,7 +30,7 @@ var SplunkLogger = SplunkLogging.Logger;
  *
  * @param {object} config - Configuration settings for a new [SplunkLogger]{@link SplunkLogger}.
  * @param {string} config.token - HTTP Event Collector token, required.
- * @param {string} [config.name=splunk-javascript-logging/0.9.3] - Name for this logger.
+ * @param {string} [config.name=splunk-javascript-logging/0.10.1] - Name for this logger.
  * @param {string} [config.host=localhost] - Hostname or IP address of Splunk server.
  * @param {string} [config.maxRetries=0] - How many times to retry when HTTP POST to Splunk fails.
  * @param {string} [config.path=/services/collector/event/1.0] - URL path to send data to on the Splunk server.
@@ -56,7 +56,7 @@ var SplunkStream = function (config) {
 
     // If using the common logger's default name, change it
     if (this.logger.config.name.match("splunk-javascript-logging/\\d\\.\\d\\.\\d")) {
-        this.logger.config.name = "splunk-bunyan-logger/0.9.3";
+        this.logger.config.name = "splunk-bunyan-logger/0.10.1";
     }
 
     // Overwrite the common library's error callback

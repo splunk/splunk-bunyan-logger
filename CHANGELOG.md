@@ -1,6 +1,6 @@
 # Splunk HTTP Event Collector Stream for Bunyan
 
-## v0.10.0
+## v0.10.1
 
 ### Breaking changes
 

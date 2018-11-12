@@ -1,6 +1,6 @@
 {
   "name": "splunk-bunyan-logger",
-  "version": "0.9.3",
+  "version": "0.10.1",
   "description": "Splunk HTTP Event Collector Stream for Bunyan",
   "homepage": "http://dev.splunk.com",
   "main": "index.js",
@@ -33,7 +33,7 @@
     "node": ">=4.0.0"
   },
   "dependencies": {
-    "splunk-logging": "0.9.3"
+    "splunk-logging": "0.10.1"
   },
   "devDependencies": {
     "bunyan": "1.4.0",
