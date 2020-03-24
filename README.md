@@ -122,9 +122,13 @@ Stay connected with other developers building on Splunk software.
 
 ### Contact us
 
+You can [contact support][contact] if you have Splunk related questions.
+
 You can reach the developer platform team at _devinfo@splunk.com_.
 
 ## License
 
 The Splunk HTTP Event Collector Stream for Bunyan is licensed under the Apache
 License 2.0. Details can be found in the LICENSE file.
+
+[contact]:                  https://www.splunk.com/en_us/support-and-services.html
