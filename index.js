@@ -62,7 +62,11 @@ var SplunkStream = function (config) {
     // Overwrite the common library's error callback
     var that = this;
     this.logger.error = function(err, context) {
-        that.emit("error", err, context);
+        try {
+            that.emit("error", err, context);
+        } catch(e) {
+            console.log(e);
+        }
     };
 
     /* jshint unused:false */
