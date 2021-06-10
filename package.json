@@ -8,7 +8,7 @@
     "docs": "jsdoc -d docs .",
     "jshint": "jshint *.js test examples",
     "pretest": "npm run jshint && npm run docs",
-    "test": "nyc --reporter=lcov --reporter=text-summary node_modules/mocha/bin/_mocha -- -R spec --exit",
+    "test": "nyc --reporter=lcov --reporter=text-summary _mocha -- -R spec --exit",
     "test-specific-file": "_mocha -- -R spec --exit ",
     "test-specific": "_mocha -- -R spec --exit -g "
   },
