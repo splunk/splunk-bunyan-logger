@@ -16,7 +16,7 @@
 
 var splunkBunyan = require("../index");
 var assert = require("assert");
-var request = require("request");
+var needle = require("needle");
 
 /** Integration Tests **/
 
@@ -65,21 +65,22 @@ function formatForBunyan(data) {
 
 describe("Setup Splunk on localhost:8089 HEC", function() {
     it("should be enabled", function(done) {
-        request.post("https://admin:changeme@localhost:8089/servicesNS/admin/splunk_httpinput/data/inputs/http/http/enable?output_mode=json", {strictSSL: false}, function(err) {
+        needle.post("https://admin:changed!@localhost:8089/servicesNS/admin/splunk_httpinput/data/inputs/http/http/enable?output_mode=json", null, {rejectUnauthorized: false}, function(err)     {
             assert.ok(!err);
             done();
         });
     });
     it("should create a token in test/config.json", function(done) {
-        request.post("https://admin:changeme@localhost:8089/servicesNS/admin/splunk_httpinput/data/inputs/http?output_mode=json", {strictSSL: false, body: "name=splunk_logging" + Date.now()}, function(err, resp, body) {
+        needle.post("https://admin:changed!@localhost:8089/servicesNS/admin/splunk_httpinput/data/inputs/http?output_mode=json", { name : "splunk_logging" + Date.now()}, {rejectUnauthorized: false}, function(err, resp, body) {
             assert.ok(!err);
+            body = JSON.stringify(body);
             var tokenStart = body.indexOf("\"token\":\"");
             var tokenEnd = tokenStart + 36; // 36 = guid length
             var token = body.substring(tokenStart + 9, tokenEnd + 9); // 9 = prefix length of \"token\":\"
             assert.strictEqual(token.length, 36);
             TOKEN = token;
             done();
-        });
+         });
     });
     it("should have the env variable set", function() {
         assert.ok(TOKEN);
