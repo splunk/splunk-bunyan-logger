@@ -213,7 +213,7 @@ describe("SplunkStream", function() {
         splunkBunyanStream.stream.write("something");
     });
     it("should retry on network error, bad host", function(done) {
-        this.timeout(3 * 1000);
+        this.timeout(20 * 1000);
         var config = {
             token: TOKEN,
             maxRetries: 3,

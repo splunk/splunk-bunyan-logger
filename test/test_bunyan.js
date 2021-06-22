@@ -787,6 +787,7 @@ describe("Bunyan", function() {
         Logger.info("this is a test statement");
     });
     it("should retry on network error", function(done) {
+        this.timeout(20 * 1000);
         var config = {
             token: TOKEN,
             maxRetries: 5,
