@@ -791,7 +791,7 @@ describe("Bunyan", function() {
         var config = {
             token: TOKEN,
             maxRetries: 5,
-            host: "splunk.invalid"
+            host: "invalid"
         };
         var splunkBunyanStream = SplunkBunyan.createStream(config);
 
