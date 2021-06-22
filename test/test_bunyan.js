@@ -818,7 +818,7 @@ describe("Bunyan", function() {
             ]
         });
 
-        //mute();
+        mute();
         Logger.info("this is a test statement");
     });
     it("should be noop when nothing to flush", function(done) {

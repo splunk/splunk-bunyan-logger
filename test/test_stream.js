@@ -233,13 +233,13 @@ describe("SplunkStream", function() {
 
         splunkBunyanStream.stream.on("error", function(err) {
             assert.ok(err);
-            assert.strictEqual("ENOTFOUND", err.code);
+            assert.strictEqual(true,["ENOTFOUND","EAI_AGAIN"].includes(err.code));
             assert.strictEqual(config.maxRetries + 1, retryCount);
             unmute();
             done();
         });
 
-        //mute();
+        mute();
         splunkBunyanStream.stream.write("something");
     });
     it("should retry on network error, wrong port", function(done) {
