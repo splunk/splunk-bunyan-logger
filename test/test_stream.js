@@ -239,7 +239,7 @@ describe("SplunkStream", function() {
             done();
         });
 
-        mute();
+        //mute();
         splunkBunyanStream.stream.write("something");
     });
     it("should retry on network error, wrong port", function(done) {
