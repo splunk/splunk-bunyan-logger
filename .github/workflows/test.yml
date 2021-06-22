@@ -20,8 +20,8 @@ jobs:
           SPLUNK_START_ARGS: --accept-license
           SPLUNK_PASSWORD: changed!
         ports:
-          - 8088
-          - 8089
+          - 8088:8088
+          - 8089:8089
     steps:
     - uses: actions/checkout@v2
     - name: Use Node.js ${{ matrix.node-version }}
