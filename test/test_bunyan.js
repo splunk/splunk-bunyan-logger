@@ -787,7 +787,8 @@ describe("Bunyan", function() {
         Logger.info("this is a test statement");
     });
     it("should retry on network error", function(done) {
-        this.timeout(20 * 1000);
+        this.timeout(3 * 1000);
+        console.log("test started");
         var config = {
             token: TOKEN,
             maxRetries: 5,
@@ -800,8 +801,10 @@ describe("Bunyan", function() {
         // Wrap the _post so we can verify retries
         var post = splunkBunyanStream.stream.logger._post;
         splunkBunyanStream.stream.logger._post = function(requestOptions, callback) {
+            console.log("inside post method, retry-count : ", retryCount);
             retryCount++;
             post(requestOptions, callback);
+            console.log("inside post method, retry-count : ", retryCount);
         };
 
         splunkBunyanStream.stream.on("error", function(err) {
