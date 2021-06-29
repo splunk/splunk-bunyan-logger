@@ -805,7 +805,7 @@ describe("Bunyan", function() {
 
         splunkBunyanStream.stream.on("error", function(err) {
             assert.ok(err);
-            assert.strictEqual("ENOTFOUND", err.code);
+            assert.strictEqual(true,["ENOTFOUND","EAI_AGAIN"].includes(err.code));
             assert.strictEqual(config.maxRetries + 1, retryCount);
             unmute();
             done();
