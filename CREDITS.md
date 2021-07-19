@@ -4,4 +4,4 @@ Some of the components included in the Splunk HTTP Event Collector Stream for Bu
 
 | Contributor | Description | License |
 |:----------- |:----------- |:------- |
-| [splunk-logging](https://github.com/splunk/splunk-javascript-logging) | This project provides a simple JavaScript interface for logging to HTTP Event Collector in Splunk Enterprise and Splunk Cloud. | [Apache](https://github.com/splunk/splunk-sdk-javascript/blob/master/licenses/LICENSE-SPLUNK-LOGGING) |
+| [splunk-logging](https://github.com/splunk/splunk-javascript-logging) | This project provides a simple JavaScript interface for logging to HTTP Event Collector in Splunk Enterprise and Splunk Cloud. | [Apache](https://github.com/splunk/splunk-bunyan-logger/blob/master/licenses/LICENSE-SPLUNK-LOGGING) |
