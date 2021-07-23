@@ -131,7 +131,7 @@ describe("Bunyan", function() {
             assert.ok(err);
             assert.ok(context);
             assert.strictEqual(err.code, "ENOTFOUND");
-            assert.strictEqual(err.errno, -3008);
+            assert.ok((err.errno === -3008) || (err.errno === "ENOTFOUND"));
             unmute();
             done();
         });
