@@ -17,7 +17,7 @@
 var SplunkBunyan = require("../index");
 var assert = require("assert");
 var bunyan = require("bunyan");
-var request = require("request");
+var needle = require("needle");
 
 var TOKEN;
 
@@ -46,23 +46,29 @@ function unmute() {
     console.log = ____consoleLog;
 }
 
+// this method returns the body based on type of response.body for assertion
+function responseBodyCheck(resp, body){
+    return typeof resp.body === "string"? JSON.stringify(body): body;
+}
+
 describe("Setup Splunk on localhost:8089 HEC", function() {
     it("should be enabled", function(done) {
-        request.post("https://admin:changeme@localhost:8089/servicesNS/admin/splunk_httpinput/data/inputs/http/http/enable?output_mode=json", {strictSSL: false}, function(err) {
+        needle.post("https://admin:changed!@localhost:8089/servicesNS/admin/splunk_httpinput/data/inputs/http/http/enable?output_mode=json", null, {rejectUnauthorized: false}, function(err)     {
             assert.ok(!err);
             done();
         });
     });
     it("should create a token in test/config.json", function(done) {
-        request.post("https://admin:changeme@localhost:8089/servicesNS/admin/splunk_httpinput/data/inputs/http?output_mode=json", {strictSSL: false, body: "name=splunk_logging" + Date.now()}, function(err, resp, body) {
+        needle.post("https://admin:changed!@localhost:8089/servicesNS/admin/splunk_httpinput/data/inputs/http?output_mode=json", { name : "splunk_logging" + Date.now()}, {rejectUnauthorized: false}, function(err, resp, body) {
             assert.ok(!err);
+            body = JSON.stringify(body);
             var tokenStart = body.indexOf("\"token\":\"");
             var tokenEnd = tokenStart + 36; // 36 = guid length
             var token = body.substring(tokenStart + 9, tokenEnd + 9); // 9 = prefix length of \"token\":\"
             assert.strictEqual(token.length, 36);
             TOKEN = token;
             done();
-        });
+         });
     });
     it("should have the env variable set", function() {
         assert.ok(TOKEN);
@@ -73,21 +79,22 @@ describe("Setup Splunk on localhost:8089 HEC", function() {
 describe("Bunyan", function() {
     describe("Setup Splunk on localhost:8089 HEC", function() {
         it("should be enabled", function(done) {
-            request.post("https://admin:changeme@localhost:8089/servicesNS/admin/splunk_httpinput/data/inputs/http/http/enable?output_mode=json", {strictSSL: false}, function(err) {
+            needle.post("https://admin:changed!@localhost:8089/servicesNS/admin/splunk_httpinput/data/inputs/http/http/enable?output_mode=json", null, {rejectUnauthorized: false}, function(err)     {
                 assert.ok(!err);
                 done();
             });
         });
         it("should create a token in test/config.json", function(done) {
-            request.post("https://admin:changeme@localhost:8089/servicesNS/admin/splunk_httpinput/data/inputs/http?output_mode=json", {strictSSL: false, body: "name=splunk_logging" + Date.now()}, function(err, resp, body) {
+            needle.post("https://admin:changed!@localhost:8089/servicesNS/admin/splunk_httpinput/data/inputs/http?output_mode=json", { name : "splunk_logging" + Date.now()}, {rejectUnauthorized: false}, function(err, resp, body) {
                 assert.ok(!err);
+                body = JSON.stringify(body);
                 var tokenStart = body.indexOf("\"token\":\"");
                 var tokenEnd = tokenStart + 36; // 36 = guid length
                 var token = body.substring(tokenStart + 9, tokenEnd + 9); // 9 = prefix length of \"token\":\"
                 assert.strictEqual(token.length, 36);
                 TOKEN = token;
                 done();
-            });
+             });
         });
         it("should have the env variable set", function() {
             assert.ok(TOKEN);
@@ -124,7 +131,7 @@ describe("Bunyan", function() {
             assert.ok(err);
             assert.ok(context);
             assert.strictEqual(err.code, "ENOTFOUND");
-            assert.strictEqual(err.errno, "ENOTFOUND");
+            assert.ok((err.errno === -3008) || (err.errno === "ENOTFOUND"));
             unmute();
             done();
         });
@@ -151,7 +158,7 @@ describe("Bunyan", function() {
         splunkBunyanStream.stream.send = function(err, resp, body) {
             assert.ok(!err);
             assert.ok(run);
-            assert.strictEqual(resp.body, JSON.stringify(body));
+            assert.strictEqual(resp.body, responseBodyCheck(resp, body));
             assert.strictEqual(body.text, invalidTokenBody.text);
             assert.strictEqual(body.code, invalidTokenBody.code);
             unmute();
@@ -198,7 +205,7 @@ describe("Bunyan", function() {
         splunkBunyanStream.stream.send = function(err, resp, body) {
             assert.ok(!err);
             assert.ok(run);
-            assert.strictEqual(resp.body, JSON.stringify(body));
+            assert.strictEqual(resp.body, responseBodyCheck(resp, body));
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
             done();
@@ -236,7 +243,7 @@ describe("Bunyan", function() {
         splunkBunyanStream.stream.send = function(err, resp, body) {
             assert.ok(!err);
             assert.ok(run);
-            assert.strictEqual(resp.body, JSON.stringify(body));
+            assert.strictEqual(resp.body, responseBodyCheck(resp, body));
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
             done();
@@ -274,7 +281,7 @@ describe("Bunyan", function() {
         splunkBunyanStream.stream.send = function(err, resp, body) {
             assert.ok(!err);
             assert.ok(run);
-            assert.strictEqual(resp.body, JSON.stringify(body));
+            assert.strictEqual(resp.body, responseBodyCheck(resp, body));
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
             done();
@@ -311,7 +318,7 @@ describe("Bunyan", function() {
         splunkBunyanStream.stream.send = function(err, resp, body) {
             assert.ok(!err);
             assert.ok(run);
-            assert.strictEqual(resp.body, JSON.stringify(body));
+            assert.strictEqual(resp.body, responseBodyCheck(resp, body));
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
             done();
@@ -349,7 +356,7 @@ describe("Bunyan", function() {
         splunkBunyanStream.stream.send = function(err, resp, body) {
             assert.ok(!err);
             assert.ok(run);
-            assert.strictEqual(resp.body, JSON.stringify(body));
+            assert.strictEqual(resp.body, responseBodyCheck(resp, body));
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
             done();
@@ -387,7 +394,7 @@ describe("Bunyan", function() {
         splunkBunyanStream.stream.send = function(err, resp, body) {
             assert.ok(!err);
             assert.ok(run);
-            assert.strictEqual(resp.body, JSON.stringify(body));
+            assert.strictEqual(resp.body, responseBodyCheck(resp, body));
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
             done();
@@ -422,7 +429,7 @@ describe("Bunyan", function() {
         // Override the default send function
         splunkBunyanStream.stream.send = function(err, resp, body) {
             assert.ok(!err);
-            assert.strictEqual(resp.body, JSON.stringify(body));
+            assert.strictEqual(resp.body, responseBodyCheck(resp, body));
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
             done();
@@ -446,7 +453,7 @@ describe("Bunyan", function() {
         // Override the default send function
         splunkBunyanStream.stream.send = function(err, resp, body) {
             assert.ok(!err);
-            assert.strictEqual(resp.body, JSON.stringify(body));
+            assert.strictEqual(resp.body, responseBodyCheck(resp, body));
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
             done();
@@ -470,7 +477,7 @@ describe("Bunyan", function() {
         // Override the default send function
         splunkBunyanStream.stream.send = function(err, resp, body) {
             assert.ok(!err);
-            assert.strictEqual(resp.body, JSON.stringify(body));
+            assert.strictEqual(resp.body, responseBodyCheck(resp, body));
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
             done();
@@ -494,7 +501,7 @@ describe("Bunyan", function() {
         // Override the default send function
         splunkBunyanStream.stream.send = function(err, resp, body) {
             assert.ok(!err);
-            assert.strictEqual(resp.body, JSON.stringify(body));
+            assert.strictEqual(resp.body, responseBodyCheck(resp, body));
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
             done();
@@ -518,7 +525,7 @@ describe("Bunyan", function() {
         // Override the default send function
         splunkBunyanStream.stream.send = function(err, resp, body) {
             assert.ok(!err);
-            assert.strictEqual(resp.body, JSON.stringify(body));
+            assert.strictEqual(resp.body, responseBodyCheck(resp, body));
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
             done();
@@ -543,7 +550,7 @@ describe("Bunyan", function() {
         // Override the default send function
         splunkBunyanStream.stream.send = function(err, resp, body) {
             assert.ok(!err);
-            assert.strictEqual(resp.body, JSON.stringify(body));
+            assert.strictEqual(resp.body, responseBodyCheck(resp, body));
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
             done();
@@ -567,7 +574,7 @@ describe("Bunyan", function() {
         // Override the default send function
         splunkBunyanStream.stream.send = function(err, resp, body) {
             assert.ok(!err);
-            assert.strictEqual(resp.body, JSON.stringify(body));
+            assert.strictEqual(resp.body, responseBodyCheck(resp, body));
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
             done();
@@ -597,7 +604,7 @@ describe("Bunyan", function() {
         splunkBunyanStream.stream.send = function(err, resp, body) {
             count++;
             assert.ok(!err);
-            assert.strictEqual(resp.body, JSON.stringify(body));
+            assert.strictEqual(resp.body, responseBodyCheck(resp, body));
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
             if (count === 2) {
@@ -655,7 +662,7 @@ describe("Bunyan", function() {
         splunkBunyanStream.stream.send = function(err, resp, body) {
             count++;
             assert.ok(!err);
-            assert.strictEqual(resp.body, JSON.stringify(body));
+            assert.strictEqual(resp.body, responseBodyCheck(resp, body));
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
             if (count === 2) {
@@ -706,7 +713,7 @@ describe("Bunyan", function() {
         splunkBunyanStream.flush(function(err, resp, body) {
             assert.ok(!err);
             assert.ok(!run); // Shouldn't execute the stream.send() above
-            assert.strictEqual(resp.body, JSON.stringify(body));
+            assert.strictEqual(resp.body, responseBodyCheck(resp, body));
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
             done();
@@ -722,7 +729,7 @@ describe("Bunyan", function() {
         // Wrap the default send function
         var send = splunkBunyanStream.stream.send;
         splunkBunyanStream.stream.send = function(err, resp, body) {
-            assert.strictEqual(resp.body, JSON.stringify(body));
+            assert.strictEqual(resp.body, responseBodyCheck(resp, body));
             assert.strictEqual(body.text, successBody.text);
             assert.strictEqual(body.code, successBody.code);
             send(err, resp, body);
@@ -798,7 +805,7 @@ describe("Bunyan", function() {
 
         splunkBunyanStream.stream.on("error", function(err) {
             assert.ok(err);
-            assert.strictEqual("ENOTFOUND", err.code);
+            assert.strictEqual(true,["ENOTFOUND","EAI_AGAIN"].includes(err.code));
             assert.strictEqual(config.maxRetries + 1, retryCount);
             unmute();
             done();

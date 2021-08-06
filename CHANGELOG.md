@@ -1,5 +1,21 @@
 # Splunk HTTP Event Collector Stream for Bunyan
 
+## v0.11.0
+
+### New features & APIs
+
+* Replaced client implementation to use `needle` in lieu of deprecated `request`.
+* Replaced client implementation to use `nyc` in lieu of deprecated `istanbul`.
+
+### Minor changes
+
+* Converted CI from Travis to Github Actions and added CD
+* Upgrade version of bunyan to 1.8.15.
+* Upgrade version of splunk-logging to 0.11.1.
+* Upgrade version of jsdoc to 3.6.7.
+* Upgrade version of jshint to 2.12.0.
+* Upgrade version of mocha to 8.4.0.
+
 ## v0.10.1
 
 ### Breaking changes
