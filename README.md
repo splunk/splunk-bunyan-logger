@@ -1,13 +1,13 @@
 # Splunk HTTP Event Collector Stream for Bunyan
 
-#### Version 0.10.1
+#### Version 0.11.0
 
 This project provides a [Bunyan](https://www.npmjs.com/package/bunyan) stream for HTTP Event Collector in Splunk Enterprise and Splunk Cloud.
 
 ## Requirements
 
-* Node.js v4 or later.
-* Splunk Enterprise 6.3.0 or later, or Splunk Cloud.
+* Node.js v4 or later. Splunk HTTP Event Collector Stream for Bunyan is tested with Node.js v10.0 and v14.0.
+* Splunk Enterprise 6.3.0 or later, or Splunk Cloud. Splunk HTTP Event Collector Stream for Bunyan is tested with Splunk Enterprise 8.0 and 8.2.0.
 * An HTTP Event Collector token from your Splunk Enterprise or Splunk Cloud server.
 * [Bunyan](https://www.npmjs.com/package/bunyan) (`npm install --save bunyan`).
 
@@ -122,9 +122,13 @@ Stay connected with other developers building on Splunk software.
 
 ### Contact us
 
+You can [contact support][contact] if you have Splunk related questions.
+
 You can reach the developer platform team at _devinfo@splunk.com_.
 
 ## License
 
 The Splunk HTTP Event Collector Stream for Bunyan is licensed under the Apache
 License 2.0. Details can be found in the LICENSE file.
+
+[contact]:                  https://www.splunk.com/en_us/support-and-services.html
