@@ -27,6 +27,13 @@ See the `examples` folder for usage examples:
 * `manual_batching.js`: Shows how to queue log messages, and send them in batches by manually calling `flush()`.
 * `retry.js`: Shows how to configure retries on errors.
 
+### Support
+
+The Splunk HTTP Event Collector Stream for Bunyan is community-supported.
+
+1. You can find help through our community on [Splunk Answers](https://community.splunk.com/t5/tag/logging-library-javascript/tg-p) (use the `logging-library-javascript` tag to identify your questions).
+2. File issues on [GitHub](https://github.com/splunk/splunk-bunyan-logger/issues).
+
 ### SSL
 
 Note: SSL certificate validation is diabled by default.
@@ -119,12 +126,6 @@ Stay connected with other developers building on Splunk software.
 </tr>
 
 </table>
-
-### Contact us
-
-You can [contact support][contact] if you have Splunk related questions.
-
-You can reach the developer platform team at _devinfo@splunk.com_.
 
 ## License
 
